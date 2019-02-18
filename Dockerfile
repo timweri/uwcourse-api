@@ -17,4 +17,4 @@ RUN pipenv install
 EXPOSE 5000
 
 # Start the Server
-CMD ["pipenv", "run", "python", "app/server.py"]
+CMD ["pipenv", "run", "python", "app/server.py", "run"]

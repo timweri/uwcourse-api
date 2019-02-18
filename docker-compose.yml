@@ -1,0 +1,12 @@
+version: '3'
+services:
+  server:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/uwcourse-api
+    links:
+      - db
+  db:
+    image: mongo:latest
