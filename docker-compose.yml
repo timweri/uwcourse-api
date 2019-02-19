@@ -2,11 +2,31 @@ version: '3'
 services:
   server:
     build: .
+    container_name: uwcourse-api-server
     ports:
       - "5000:5000"
     volumes:
       - .:/uwcourse-api
     links:
-      - db
-  db:
+      - db-mongo
+    stdin_open: true
+    tty: true
+  db-mongo:
     image: mongo:latest
+    container_name: uwcourse-api-db
+    volumes:
+      - mongodata:/data/db
+    stdin_open: true
+    tty: true
+  db-mongo-admin:
+    image: mongo-express:latest
+    container_name: uwcourse-api-db-admin
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_OPTIONS_EDITORTHEME: ambiance
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: 123456
+      ME_CONFIG_MONGODB_SERVER: uwcourse-api-db
+volumes:
+  mongodata:
