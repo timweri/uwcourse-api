@@ -1,6 +1,14 @@
 version: '3'
 services:
   server:
+    build: .
+    container_name: uwcourse-api-server
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/uwcourseapi
+    stdin_open: true
+    tty: true
   db-mongo:
     image: mongo:latest
     container_name: uwcourse-api-db

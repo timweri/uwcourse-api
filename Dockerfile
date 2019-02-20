@@ -13,5 +13,8 @@ ADD . /uwcourseapi
 # Install all node packages
 RUN npm i
 
+# Expose port 5000
+EXPOSE 5000
+
 # Start the API
 CMD ["node", "server.js"]
