@@ -7,6 +7,8 @@ services:
       - "5000:5000"
     volumes:
       - .:/uwcourseapi
+    links:
+      - db-mongo
     stdin_open: true
     tty: true
   db-mongo:
@@ -14,6 +16,8 @@ services:
     container_name: uwcourse-api-db
     volumes:
       - mongodata:/data/db
+    expose:
+      - 27017
     stdin_open: true
     tty: true
   db-mongo-admin:
