@@ -1,2 +1,4 @@
 // Edit current user profile
-exports.users_edit = (req, res) => {};
+users_edit = (req, res) => {};
+
+module.exports = users_edit;

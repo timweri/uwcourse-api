@@ -1,2 +1,4 @@
 // Retrieve a list of courses
-exports.courses_list = (req, res) => {};
+courses_list = (req, res) => {};
+
+module.exports = courses_list;

@@ -1,2 +1,4 @@
 // Retrieve a list of courses by liked rating
-exports.courses_list_liked = (req, res) => {};
+courses_list_liked = (req, res) => {};
+
+module.exports = courses_list_liked;

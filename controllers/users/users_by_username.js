@@ -1,2 +1,4 @@
 // Search a user by username
-exports.users_by_username = (req, res) => {};
+users_by_username = (req, res) => {};
+
+module.exports = users_by_username;
