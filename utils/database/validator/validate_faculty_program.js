@@ -1,4 +1,4 @@
-//exports.possible_faculty = ['Applied Health Sciences', 'Arts', 'Engineering', 'Environment', 'Mathematics', 'Science'];
+exports.possible_faculty = ['Applied Health Sciences', 'Arts', 'Engineering', 'Environment', 'Mathematics', 'Science'];
 const valid_programs = {
     'Applied Health Sciences': ['Health Studies', 'Kinesiology', 'Public Health', 'Recreation and Leisure Studies',
         'Recreation and Sport Business', 'Therapeutic Recreation', 'Tourism Development'],
