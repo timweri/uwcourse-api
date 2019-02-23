@@ -2,8 +2,8 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const faculty_program_validator = require('../utils/database/validators/validate_faculty_program');
-const TimestampType = require('./types/timestamp');
-const OverallRatingType = require('./types/overall_rating');
+const TimestampType = require('./types/Timestamp');
+const OverallRatingType = require('./types/OverallRating');
 
 /**
  * User Schema Subdocuments

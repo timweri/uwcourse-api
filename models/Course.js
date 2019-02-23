@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const TimestampType = require('./types/timestamp');
-const CompactCourseRatingType = require('./types/compact_course_rating');
-const CompactInstructorRatingType = require('./types/compact_instructor_rating');
-const OverallRatingType = require('./types/overall_rating');
+const TimestampType = require('./types/Timestamp');
+const CompactCourseRatingType = require('./types/CompactCourseRating');
+const CompactInstructorRatingType = require('./types/CompactInstructorRating');
+const OverallRatingType = require('./types/OverallRating');
 
 /**
  * Course Schema Subdocuments

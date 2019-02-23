@@ -1,18 +1,23 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const TimestampType = require('./types/timestamp');
-const RatingType = require('./types/rating');
+const TimestampType = require('./types/Timestamp');
+const RatingType = require('./types/Rating');
 
 /**
  * Course Rating Schema
  */
 
-const CourseRatingSchema = new Schema({
+const InstructorRatingSchema = new Schema({
     course_id: {
         type: Schema.Types.ObjectId,
         required: [true, 'Course reference required'],
         ref: 'Course'
+    },
+    instructor_id: {
+        type: Schema.Types.ObjectId,
+        required: [true, 'Instructor id required'],
+        ref: 'Instructor'
     },
     author_id: {
         type: Schema.Types.ObjectId,
@@ -21,11 +26,11 @@ const CourseRatingSchema = new Schema({
     },
     term_id: {
         type: Schema.Types.ObjectId,
-        required: [true, 'Term reference required']
+        required: [true, 'Term reference required'],
+        ref: ''
     },
-    liked_rating: RatingType('Liked rating required'),
-    easy_rating: RatingType('Easy rating required'),
-    useful_rating: RatingType('Useful rating required'),
+    liked: RatingType('Liked rating required'),
+    easy: RatingType('Easy rating required'),
     content: {
         type: String,
         required: [true, 'Content required'],
@@ -35,4 +40,4 @@ const CourseRatingSchema = new Schema({
     last_updated_at: TimestampType
 });
 
-module.exports = mongoose.model('CourseRating', CourseRatingSchema);
+module.exports = mongoose.model('InstructorRating', InstructorRatingSchema);

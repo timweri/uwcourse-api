@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const CompactRatingAuthorType = require('./compact_rating_author');
-const RatingType = require('./rating');
+const CompactRatingAuthorType = require('./CompactRatingAuthor');
+const RatingType = require('./Rating');
 
 module.exports = new Schema({
     id: {
