@@ -1,9 +1,14 @@
-const express = require('express');
-const users = express.Router();
+const controller = require('../controllers/users')
 
-const users_controllers = require('require.all')('../controllers/users');
+module.exports = (router) => {
+    router.route('/users')
+    .post(controller.add);
 
-users.get('/self', users_controllers.users_self);
+    router.route('/login')
+    .post(controller.login);
+};
+
+/*users.get('/self', users_controllers.users_self);
 
 users.put('/self', users_controllers.users_create);
 
@@ -11,6 +16,4 @@ users.post('/self', users_controllers.users_edit);
 
 users.get('/:user_id', users_controllers.users_by_id);
 
-users.get('/', (req, res) => {});
-
-module.exports = users;
+users.get('/', (req, res) => {});*/
