@@ -5,7 +5,9 @@ const bcrypt = require('bcrypt');
 const environment = process.env.NODE_ENV;
 const stage = require('../config')[environment];
 
-const faculty_program_validator = require('../utils/database/validator/validate_faculty_program');
+const faculty_program_validator = require('../utils/database/validators/validate_faculty_program');
+const TimestampType = require('./types/timestamp');
+const OverallRatingType = require('./types/overall_rating');
 
 /**
  * User Schema Subdocuments
@@ -15,11 +17,8 @@ const CompactCourse = new Schema({
     id: {type: Schema.Types.ObjectId, ref: 'Course', required: [true, 'Course reference missing']},
     title: {type: String, required: [true, 'Course title missing']},
     subject: {type: String, required: [true, 'Course subject missing'], match: ''},
-    catalog: {type: String, required: [true, 'Course catalog number missing']},
-    rating: new Schema({
-        value: {type: Number, required: [true, 'Course rating missing']},
-        count: {type: Number, required: [true, 'Course rating count missing']}
-    })
+    catalog_number: {type: String, required: [true, 'Course catalog number missing']},
+    liked_rating: OverallRatingType('Course liked')
 });
 
 const CompactTerm = new Schema({
@@ -64,7 +63,9 @@ const UserSchema = new Schema({
         }
     },
     favourite_courses: [CompactCourse],
-    terms: [CompactTerm]
+    terms: [CompactTerm],
+    created_at: TimestampType,
+    last_updated_at: TimestampType
 });
 
 
