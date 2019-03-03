@@ -1,0 +1,5 @@
+# Hide the API keys
+config.js
+
+# Hide npm files
+node_modules/

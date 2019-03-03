@@ -1,34 +1,43 @@
 version: '3'
 services:
   server:
-    build: .
-    container_name: uwcourse-api-server
+    build:
+      context: .
+      dockerfile: Dockerfile-server
+    container_name: uwcourse-server
     ports:
       - "5000:5000"
-    volumes:
-      - .:/uwcourseapi
     links:
-      - db-mongo
+      - mongodb
     stdin_open: true
     tty: true
-  db-mongo:
+  taskrunner:
+    build:
+      context: .
+      dockerfile: Dockerfile-taskrunner
+    container_name: uwcourse-taskrunner
+    links:
+      - mongodb
+    stdin_open: true
+    tty: true
+  mongodb:
     image: mongo:latest
-    container_name: uwcourse-api-db
+    container_name: uwcourse-mongodb
     volumes:
       - mongodata:/data/db
     expose:
       - 27017
     stdin_open: true
     tty: true
-  db-mongo-admin:
+  mongodb-admin:
     image: mongo-express:latest
-    container_name: uwcourse-api-db-admin
+    container_name: uwcourse-mongodb-admin
     ports:
       - "8081:8081"
     environment:
       ME_CONFIG_OPTIONS_EDITORTHEME: ambiance
       ME_CONFIG_BASICAUTH_USERNAME: admin
       ME_CONFIG_BASICAUTH_PASSWORD: 123456
-      ME_CONFIG_MONGODB_SERVER: uwcourse-api-db
+      ME_CONFIG_MONGODB_SERVER: uwcourse-mongodb
 volumes:
   mongodata:

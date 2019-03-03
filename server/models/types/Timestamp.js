@@ -1,4 +1,4 @@
-const timestamp_validator = require('../../utils/database/validators/validate_timestamp');
+const timestamp_validator = require('../../../utils/database/validators/validate_timestamp');
 
 module.exports = {
     type: String,

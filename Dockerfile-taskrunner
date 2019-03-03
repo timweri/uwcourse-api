@@ -5,16 +5,13 @@ MAINTAINER Duc Thanh Nguyen (ng.duc.tahn@gmail.com)
 ENV NODE_ENV development
 
 # Select Working Directory
-WORKDIR /uwcourseapi
+WORKDIR /uwcourse-taskrunner
 
 # Copy the app folder to the Working Directory
-ADD . /uwcourseapi
+ADD ./taskrunner /uwcourse-taskrunner
 
 # Install all node packages
 RUN npm i
 
-# Expose port 5000
-EXPOSE 5000
-
 # Start the API
-CMD ["node", "server.js"]
+CMD ["node", "start.js"]
