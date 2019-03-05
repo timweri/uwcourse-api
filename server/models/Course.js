@@ -41,14 +41,18 @@ const CourseSchema = new Schema({
     url: {
         type: String
     },
-    uw_id: {
+    // This is the course id assigned by UW Registrar
+    // course_id is not unique due to crosslisting
+    course_id: {
         type: String,
         required: [true, 'UW Course ID required'],
+        index: true
     },
     units: {
         type: Number,
         required: [true, 'Course unit worth required']
     },
+    description: String,
     academic_level: String,
     instructions: [String],
     instructors: [{
@@ -76,7 +80,6 @@ const CourseSchema = new Schema({
     needs_department_consent: Boolean,
     needs_instructor_consent: Boolean,
     notes: String,
-    calendar_year: String,
     extra: [],
     created_at: TimestampType,
     last_updated_at: TimestampType

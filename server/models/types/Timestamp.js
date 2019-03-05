@@ -1,4 +1,5 @@
-const timestamp_validator = require('../../../utils/database/validators/validate_timestamp');
+const approot = require('app-root-path');
+const timestamp_validator = require(`${approot}/utils/database/validators/validate_timestamp`);
 
 module.exports = {
     type: String,

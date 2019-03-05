@@ -9,6 +9,12 @@ WORKDIR /uwcourse-taskrunner
 
 # Copy the app folder to the Working Directory
 ADD ./taskrunner /uwcourse-taskrunner
+COPY ./server/models /uwcourse-taskrunner/models
+COPY ./utils /uwcourse-taskrunner/utils
+
+# Create an empty data folder to store database state
+# This avoid having to check if the folder exists using node.js filesystem
+RUN mkdir -p /uwcourse-taskrunner/uwopendata/data
 
 # Install all node packages
 RUN npm i
