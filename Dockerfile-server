@@ -5,10 +5,11 @@ MAINTAINER Duc Thanh Nguyen (ng.duc.tahn@gmail.com)
 ENV NODE_ENV development
 
 # Select Working Directory
-WORKDIR /uwcourseapi
+WORKDIR /uwcourse-server/server
 
 # Copy the app folder to the Working Directory
-ADD . /uwcourseapi
+ADD ./server /uwcourse-server/server
+ADD ./utils /uwcourse-server/utils
 
 # Install all node packages
 RUN npm i
