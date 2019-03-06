@@ -1,7 +1,7 @@
 const approot = require('app-root-path');
 const logger = require(`${approot}/config/winston`)('scape_courses task');
 const fs = require('fs');
-const coursemodel = require(`${approot}/models/Course`);
+const Course = require(`${approot}/models/Course`);
 const uwapi = require('../config/uwopendata_api');
 const coursediff = require('../utils/course_diff');
 const timeOut = require(`${approot}/utils/delay`);
@@ -17,12 +17,15 @@ const timeOut = require(`${approot}/utils/delay`);
  * @param options
  * @returns {Promise<void>}
  */
-module.exports = async (options = {
-    docPath: `${approot}/uwopendata/data/courses.json`,
-    docEncoding: 'utf8',
-    batchSize: 300,
-    batchDelay: 500,
-}) => {
+module.exports = async (options) => {
+    options = Object.assign({
+        docPath: `${approot}/uwopendata/data/courses.json`,
+        docEncoding: 'utf8',
+        batchSize: 300,
+        batchDelay: 500,
+        firstRun: false
+    }, options);
+
     let res_dict = {}; // dictionary of courses by course_id
     let file_exist = true; // check of the cache file exists
 
@@ -30,6 +33,8 @@ module.exports = async (options = {
         // res contains a list of all courses
         // the message field is thrown away
         let res = (await uwapi.get('/courses', {})).data;
+
+        res = res.slice(0, 50);
 
         // create a dict of courses from res
         for (let entry of res) {
@@ -45,7 +50,7 @@ module.exports = async (options = {
             // Create a queue of parameters for GET requests
             let queue = [];
             for (const e of res) {
-                queue.push({ endpoint: `/courses/${e.subject}/${e.catalog_number}`, qs: {}});
+                queue.push({endpoint: `/courses/${e.subject}/${e.catalog_number}`, qs: {}});
             }
 
             // details_data contain an array of all responses, each corresponds to a course, from the UW API
@@ -54,7 +59,7 @@ module.exports = async (options = {
             // Since there might be too many courses, we need to put a delay between our requests
             const requestInBatch = async () => {
                 while (queue.length > 0) {
-                    let batch_result = await Promise.all(queue.slice(0,options.batchSize).map(e => uwapi.get(e.endpoint, e.qs)));
+                    let batch_result = await Promise.all(queue.slice(0, options.batchSize).map(e => uwapi.get(e.endpoint, e.qs)));
                     queue = queue.slice(options.batchSize);
                     await timeOut(options.batchDelay);
                     for (let e of batch_result)
@@ -98,54 +103,41 @@ module.exports = async (options = {
         }
     }
 
-    // Check if DOC_PATH exists
-    try {
-        await fs.promises.access(options.docPath, fs.constants.F_OK);
-    } catch (err) {
-        if (err.code === 'ENOENT')
-            file_exist = false;
-        else throw Error(err);
-    }
-    logger.info(`${options.docPath} ${file_exist ? 'exist' : 'does not exist'}`);
-    if (!file_exist) {
-        logger.info('Updating the whole database');
-        let new_courses = coursediff.newCourses([], res_dict);
-        let bulk = coursemodel.collection.initializeUnorderedBulkOp();
-        for (let c of new_courses) {
-            bulk.find({
-                course_id: c.course_id,
-                subject: c.subject,
-                catalog_number: c.catalog_number
-            }).upsert().updateOne(c);
+    if (!options.firstRun) {
+        // Check if DOC_PATH exists
+        try {
+            await fs.promises.access(options.docPath, fs.constants.F_OK);
+        } catch (err) {
+            if (err.code === 'ENOENT')
+                file_exist = false;
+            else throw Error(err);
         }
-        await bulk.execute();
-        logger.info(`Successfully updated ${new_courses.length} courses on database`);
+        logger.info(`${options.docPath} ${file_exist ? 'exist' : 'does not exist'}`);
+    }
+
+    var items = [];
+    if (!file_exist || options.firstRun) {
+        logger.info('Updating the whole database');
+        items = coursediff.newCourses([], res_dict);
     } else {
         logger.info('Loading previous state documents and compare');
         let previous_state = JSON.parse(await fs.promises.readFile(options.docPath, options.docEncoding));
-        let new_courses = coursediff.newCourses(previous_state, res_dict);
-        let diff_courses = coursediff.generateModifications(previous_state, res_dict);
-
-        logger.info('Generating bulk write operations to update Courses collection');
-        let bulk = coursemodel.collection.initializeUnorderedBulkOp();
-        for (let c of new_courses) {
-            bulk.find({
-                course_id: c.course_id,
-                subject: c.subject,
-                catalog_number: c.catalog_number
-            }).upsert().updateOne(c);
-        }
-
-        for (let c of diff_courses) {
-            bulk.find(c.find).updateOne(c.update());
-        }
-        await bulk.execute();
-        logger.info(`Successfully updated ${new_courses.length} new courses and ${diff_courses.length} other courses ` +
-            `on database`);
+        items = coursediff.newCourses(previous_state, res_dict);
+        items = items + coursediff.generateModifications(previous_state, res_dict);
     }
 
-    logger.info(`Saving database state to ${options.docPath}`);
     try {
+        const upsert_result = await Course.upsertMany(items);
+        logger.info(`Successfully updated ${upsert_result.nUpserted} and created ${upsert_result.nModified} ` +
+            `courses on database`);
+    } catch (err) {
+        logger.error(`Failed to update Course model`);
+        logger.error(err);
+        throw Error(err);
+    }
+
+    try {
+        logger.info(`Saving database state to ${options.docPath}`);
         await fs.promises.writeFile(options.docPath, JSON.stringify(res_dict), options.docEncoding);
         logger.info(`Updated ${options.docPath}`);
     } catch (err) {

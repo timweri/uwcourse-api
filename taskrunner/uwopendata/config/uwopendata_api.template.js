@@ -24,7 +24,7 @@ const filterResponse = (response, endpoint, qs) => {
     };
     if (fnMap.hasOwnProperty(endpoint)) {
         let new_response = fnMap[endpoint](response);
-        logger.verbose(`Filtered out ${response.length - new_response.length} items from endpoint ${endpoint}`);
+        logger.verbose(`Filtered out ${response.data.length - new_response.data.length} items from endpoint ${endpoint}`);
         return new_response;
     }
     else
