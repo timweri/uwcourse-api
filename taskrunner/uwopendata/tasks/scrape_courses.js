@@ -20,31 +20,24 @@ const timeOut = require(`${approot}/utils/delay`);
 module.exports = async (options = {
     docPath: `${approot}/uwopendata/data/courses.json`,
     docEncoding: 'utf8',
-    batchSize: 20,
+    batchSize: 300,
     batchDelay: 500,
 }) => {
-    // convert an array of courses to a dictionary of courses
-    let res_dict = {};
-    let file_exist = true;
+    let res_dict = {}; // dictionary of courses by course_id
+    let file_exist = true; // check of the cache file exists
 
     {
         // res contains a list of all courses
-        // the message node is thrown away
+        // the message field is thrown away
         let res = (await uwapi.get('/courses', {})).data;
 
-        // filter out incorrect entries
-        res = res.filter((e) => {
-            return !e.catalog_number.includes('`');
-        });
-
-        res.forEach(e => {
-            if (e.catalog_number === '774`') return;
-            if (res_dict[e.course_id]) {
-                res_dict[e.course_id].push(e);
-            } else {
-                res_dict[e.course_id] = [e];
-            }
-        });
+        // create a dict of courses from res
+        for (let entry of res) {
+            if (res_dict.hasOwnProperty(entry.course_id))
+                res_dict[entry.course_id].push(entry);
+            else
+                res_dict[entry.course_id] = [entry];
+        }
 
         {
             logger.info(`Requesting details of ${res.length} courses, one by one`);
