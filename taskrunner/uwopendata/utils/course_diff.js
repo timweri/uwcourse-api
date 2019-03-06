@@ -39,13 +39,10 @@ exports.newCourses = (prev_courses, cur_courses) => {
 
 /**
  * Find all the differences in courses that are present in both prev_courses and cur_courses
- * Return an array of MongoDB's Bulk.find.update() parameters
  *
  * @param prev_courses - the dictionary containing all courses of previous state, grouped by `course_id`
  * @param cur_courses - the dictionary containing all courses of current state, grouped by `course_id`
- * @returns {Array} - each element of the returned array can be used to update one course using Bulk.find.update()
- *                      the argument to find is stored as property `find`
- *                      the argument to update is stored as property `update`
+ * @returns {Array} - each element of the returned array can be used to update one course using upsertMany
  */
 exports.generateModifications = (prev_courses, cur_courses) => {
     let result = [];
@@ -57,16 +54,13 @@ exports.generateModifications = (prev_courses, cur_courses) => {
                 for (const cur of cur_values) {
                     if (cur.subject === prev.subject && cur.catalog_number === prev.catalog_number) {
                         let new_item = {
-                            find: {
                                 course_id: key,
                                 subject: cur.subject,
                                 catalog_number: cur.catalog_number
-                            },
-                            update: {}
                         };
                         for (const prop in prev) {
                             if (cur[prop] !== prev[prop] && JSON.stringify(cur[prop]) !== JSON.stringify(prev[prop]))
-                                new_item.update[prop] = cur[prop];
+                                new_item[prop] = cur[prop];
                         }
                         result.push(new_item);
                         break;
