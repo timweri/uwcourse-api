@@ -1,4 +1,4 @@
-exports.possible_faculty = ['Applied Health Sciences', 'Arts', 'Engineering', 'Environment', 'Mathematics', 'Science'];
+const possible_faculty = ['Applied Health Sciences', 'Arts', 'Engineering', 'Environment', 'Mathematics', 'Science'];
 const valid_programs = {
     'Applied Health Sciences': ['Health Studies', 'Kinesiology', 'Public Health', 'Recreation and Leisure Studies',
         'Recreation and Sport Business', 'Therapeutic Recreation', 'Tourism Development'],
@@ -32,27 +32,34 @@ const valid_programs = {
     'Others': ['Optometry', 'Pharmacy', 'Social Work']
 };
 
+exports.possible_faculty = possible_faculty;
 exports.valid_programs = valid_programs;
 
 // Takes in a String representing a faculty
 // Check if the faculty is valid
 exports.validate_faculty = (faculty) => {
     return new Promise((resolve, reject) => {
-        if (faculty in valid_programs)
+        if (possible_faculty.includes(faculty))
             resolve(true);
         else
             reject(false);
     });
 };
 
-// Takes in a String representing a program
-// Check if the program is valid
-exports.validate_program = (program) => {
-    let faculty = this.faculty;
+
+function validate_program(faculty, program) {
+    console.log("faculty:");
+    console.log(faculty);
+    console.log("program:");
+    console.log(program);
     return new Promise((resolve, reject) => {
-        if (program in valid_programs[faculty])
+        if (valid_programs[faculty].includes(program)){
             resolve(true);
-        else
+        }
+        else{
             reject(false);
+        }        
     });
-};
+}
+
+exports.validate_program = validate_program;

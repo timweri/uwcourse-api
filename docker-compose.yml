@@ -5,8 +5,6 @@ services:
     container_name: uwcourse-api-server
     ports:
       - "5000:5000"
-    volumes:
-      - .:/uwcourseapi
     links:
       - db-mongo
     stdin_open: true

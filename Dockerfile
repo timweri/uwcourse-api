@@ -10,6 +10,14 @@ WORKDIR /uwcourseapi
 # Copy the app folder to the Working Directory
 ADD . /uwcourseapi
 
+RUN apk add --update \
+    python \
+    python-dev \
+    py-pip \
+    build-base \
+  && pip install virtualenv \
+  && rm -rf /var/cache/apk/*
+
 # Install all node packages
 RUN npm i
 

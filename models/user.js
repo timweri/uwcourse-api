@@ -1,9 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const bcrypt = require('bcrypt');
+const argon2 = require('argon2');
 
-const environment = process.env.NODE_ENV;
-const stage = require('../config')[environment];
 
 const faculty_program_validator = require('../utils/database/validators/validate_faculty_program');
 const TimestampType = require('./types/timestamp');
@@ -30,17 +28,17 @@ const CompactTerm = new Schema({
 /**
  * User Schema
  */
-
+ 
 const UserSchema = new Schema({
     name: {
         type: String,
         required: [true, 'Name required'],
-        match: [`^[a-zA-Z -']+$`, 'Special characters and numbers not allowed']
+        match: [/^[a-zA-Z -']+$/, 'Special characters and numbers not allowed']
     },
     email: {
         type: String,
         required: [true, 'Email required'],
-        match: ['^[^\\s@]+@(edu.)??uwaterloo.ca$', 'Invalid UWaterloo email format'],
+        match: [/^[^\\@]+@(edu.)??uwaterloo.ca$/, 'Invalid UWaterloo email format'],
         index: true,
         unique: true
     },
@@ -55,10 +53,27 @@ const UserSchema = new Schema({
         required: [true, 'Faculty required']
     },
     program: {
-        type: Number,
+        type: String,
         required: [true, 'Program required'],
         validate: {
-            validator: faculty_program_validator.validate_program,
+            //validator: faculty_program_validator.validate_faculty(this.faculty, this.program),
+            validator: function() {
+                console.log("faculty:");
+                console.log(this.faculty);
+                console.log("program:");
+                console.log(this.program);
+                return new Promise((resolve, reject) => {
+                    console.log(faculty_program_validator.valid_programs[this.faculty]);
+                    if (faculty_program_validator.valid_programs[this.faculty].includes(this.program)){
+                        console.log('true');
+                        resolve(true);
+                    }
+                    else{
+                        console.log('false')
+                        reject(false);
+                    }        
+                });
+            },
             message: props => `${props.value} is an invalid program`
         }
     },
@@ -70,21 +85,43 @@ const UserSchema = new Schema({
 
 
 // encrypt password before save
-UserSchema.pre('save', function(next) {
+UserSchema.pre('save', async function(next) {
     const user = this;
     if(!user.isModified || !user.isNew) { // don't rehash if it's an old user
+        console.log('test0');
       next();
     } else {
-      bcrypt.hash(user.password, stage.saltingRounds, function(err, hash) {
-        if (err) {
-          console.log('Error hashing password for user', user.name);
-          next(err);
-        } else {
-          user.password = hash;
-          next();
+        console.log('test1');
+        try {
+            console.log('test2');
+            const hash = await argon2.hash(user.hashed_password);
+            console.log(hash);
+            user.hashed_password = hash;
+            next();
+        } catch (err) {
+            console.log(err);
+            console.log('Error hashing password for user', user.name);
+            next(err);
         }
-      });
     }
-  });
+});
+
+// // encrypt password before save
+// UserSchema.pre('save', function(next) {
+//     const user = this;
+//     if(!user.isModified || !user.isNew) { // don't rehash if it's an old user
+//       next();
+//     } else {
+//       argon2.hash(user.hashed_password, stage.saltingRounds, function(err, hash) {
+//         if (err) {
+//           console.log('Error hashing password for user', user.name);
+//           next(err);
+//         } else {
+//           user.hashed_password = hash;
+//           next();
+//         }
+//       });
+//     }
+//   });
 
 module.exports = mongoose.model('User', UserSchema);
