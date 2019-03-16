@@ -2,8 +2,8 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const argon2 = require('argon2');
 
-const faculty_program_validator = require('../utils/database/validators/validate_faculty_program');
-const OverallRatingType = require('./types/overall_rating');
+const faculty_program_validator = require('../../utils/database/validators/validate_faculty_program');
+const OverallRatingType = require('./types/OverallRating');
 
 /**
  * User Schema Subdocuments
@@ -67,7 +67,7 @@ const UserSchema = new Schema({
                         resolve(true);
                     }
                     else{
-                        console.log('false')
+                        console.log('false');
                         reject(false);
                     }
                 });

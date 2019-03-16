@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const TimestampType = require('./types/Timestamp');
-
 /**
  * Instructor Scheme
  */
@@ -23,8 +21,6 @@ const InstructorSchema = new Schema({
     avatar_url: {type: String, default: ''},
     email: String,
     office: String,
-    created_at: TimestampType,
-    last_updated_at: TimestampType
 });
 
 module.exports = mongoose.model('Instructor', InstructorSchema);

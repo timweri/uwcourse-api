@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const TimestampType = require('./types/Timestamp');
-
 /**
  * Term Schema
  */
@@ -28,8 +26,6 @@ const TermSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Term'
     }],
-    created_at: TimestampType,
-    last_updated_at: TimestampType
 });
 
 module.exports = mongoose.model('Term', TermSchema);
