@@ -18,7 +18,6 @@ mongoose.connection.once('open', async () => {
     logger.info('Successfully connected to database uwcourseapi');
 
     await uwopendataTasks.scrape_courses({firstRun: true});
-    logger.info('Task `scrape_courses` completed');
     //cron.schedule('*/5 * * * *', async () => {
     //    await uwopendataTasks.scrape_courses();
     //    logger.info('Task `scrape_courses` completed');
