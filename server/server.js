@@ -13,7 +13,7 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://db-mongo:27017/uwcourseapi', {useNewUrlParser: true});
+mongoose.connect('mongodb://mongodb:27017/uwcourseapi', {useNewUrlParser: true});
 const db = mongoose.connection;
 
 db.on('error', console.error.bind(console, 'Connection error: unable to connect to uwcourseapi database'));

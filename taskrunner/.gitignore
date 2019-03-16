@@ -1,0 +1,5 @@
+# Hide the API keys
+uwopendata_api.js
+
+# Hide npm files
+node_modules/

@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const TimestampType = require('./types/timestamp');
 const RatingType = require('./types/rating');
 
 /**
@@ -31,8 +30,6 @@ const CourseRatingSchema = new Schema({
         required: [true, 'Content required'],
         match: ['^[a-zA-Z0-9?><;,{}[\\]\\-_+=!@#$%\\^&*|\']*$', 'Some characters are not allowed']
     },
-    created_at: TimestampType,
-    last_updated_at: TimestampType
 });
 
 module.exports = mongoose.model('CourseRating', CourseRatingSchema);
