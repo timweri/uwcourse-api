@@ -1,22 +1,17 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const RatingType = require('./types/rating');
+const RatingType = require('./types/Rating');
 
 /**
  * Course Rating Schema
  */
 
-const InstructorRatingSchema = new Schema({
+const CourseRatingSchema = new Schema({
     course_id: {
         type: Schema.Types.ObjectId,
         required: [true, 'Course reference required'],
         ref: 'Course'
-    },
-    instructor_id: {
-        type: Schema.Types.ObjectId,
-        required: [true, 'Instructor id required'],
-        ref: 'Instructor'
     },
     author_id: {
         type: Schema.Types.ObjectId,
@@ -25,11 +20,11 @@ const InstructorRatingSchema = new Schema({
     },
     term_id: {
         type: Schema.Types.ObjectId,
-        required: [true, 'Term reference required'],
-        ref: ''
+        required: [true, 'Term reference required']
     },
-    liked: RatingType('Liked rating required'),
-    easy: RatingType('Easy rating required'),
+    liked_rating: RatingType('Liked rating required'),
+    easy_rating: RatingType('Easy rating required'),
+    useful_rating: RatingType('Useful rating required'),
     content: {
         type: String,
         required: [true, 'Content required'],
@@ -37,4 +32,4 @@ const InstructorRatingSchema = new Schema({
     },
 });
 
-module.exports = mongoose.model('InstructorRating', InstructorRatingSchema);
+module.exports = mongoose.model('CourseRating', CourseRatingSchema);

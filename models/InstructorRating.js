@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const RatingType = require('./types/rating');
+const RatingType = require('./types/Rating');
 
 /**
  * Course Rating Schema
