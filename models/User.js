@@ -2,8 +2,8 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const argon2 = require('argon2');
 
-const faculty_program_validator = require('../../utils/database/validators/validate_faculty_program');
-const OverallRatingType = require('./types/OverallRating');
+const faculty_program_validator = require('../utils/database/validators/validate_faculty_program');
+const OverallRatingType = require('./types/overall_rating');
 
 /**
  * User Schema Subdocuments
@@ -26,7 +26,7 @@ const CompactTerm = new Schema({
 /**
  * User Schema
  */
- 
+
 const UserSchema = new Schema({
     name: {
         type: String,
@@ -67,9 +67,9 @@ const UserSchema = new Schema({
                         resolve(true);
                     }
                     else{
-                        console.log('false');
+                        console.log('false')
                         reject(false);
-                    }        
+                    }
                 });
             },
             message: props => `${props.value} is an invalid program`
@@ -85,7 +85,7 @@ UserSchema.pre('save', async function(next) {
     const user = this;
     if(!user.isModified || !user.isNew) { // don't rehash if it's an old user
         console.log('test0');
-      next();
+        next();
     } else {
         console.log('test1');
         try {
