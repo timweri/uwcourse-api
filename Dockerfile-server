@@ -5,11 +5,20 @@ MAINTAINER Duc Thanh Nguyen (ng.duc.tahn@gmail.com)
 ENV NODE_ENV development
 
 # Select Working Directory
-WORKDIR /uwcourse-server/server
+Workdir /uwcourse-server
 
 # Copy the app folder to the Working Directory
-ADD ./server /uwcourse-server/server
-ADD ./utils /uwcourse-server/utils
+ADD ./server /uwcourse-server
+COPY ./utils /uwcourse-server/utils
+COPY ./models /uwcourse-server/models
+
+RUN apk add --update \
+    python \
+    python-dev \
+    py-pip \
+    build-base \
+  && pip install virtualenv \
+  && rm -rf /var/cache/apk/*
 
 # Install all node packages
 RUN npm i

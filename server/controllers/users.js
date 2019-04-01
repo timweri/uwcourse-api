@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const User = require('../models/user');
+const User = require('../models/User');
 const argon2 = require('argon2');
 const jwt = require('jsonwebtoken')
 
