@@ -5,13 +5,19 @@ MAINTAINER Duc Thanh Nguyen (ng.duc.tahn@gmail.com)
 ENV NODE_ENV development
 
 # Select Working Directory
-Workdir /uwcourse-server
+WORKDIR /uwcourse-server
 
 # Copy the app folder to the Working Directory
-ADD ./server /uwcourse-server
-COPY ./utils /uwcourse-server/utils
-COPY ./models /uwcourse-server/models
+COPY ./server /uwcourse-server
 
+# Remove symlinks
+RUN rm -rf models utils
+
+# Copy the original symlink targets
+COPY ./models /uwcourse-server/models
+COPY ./utils /uwcourse-server/utils
+
+# Install python to compile argon2
 RUN apk add --update \
     python \
     python-dev \
@@ -21,6 +27,7 @@ RUN apk add --update \
   && rm -rf /var/cache/apk/*
 
 # Install all node packages
+RUN npm i -g node-gyp
 RUN npm i
 
 # Expose port 5000

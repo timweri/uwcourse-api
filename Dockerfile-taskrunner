@@ -8,8 +8,13 @@ ENV NODE_ENV development
 WORKDIR /uwcourse-taskrunner
 
 # Copy the app folder to the Working Directory
-ADD ./taskrunner /uwcourse-taskrunner
-COPY ./server/models /uwcourse-taskrunner/models
+COPY ./taskrunner /uwcourse-taskrunner
+
+# Remove symlinks
+RUN rm -rf models utils
+
+# Copy the original symlink targets
+COPY ./models /uwcourse-taskrunner/models
 COPY ./utils /uwcourse-taskrunner/utils
 
 # Create an empty data folder to store database state
