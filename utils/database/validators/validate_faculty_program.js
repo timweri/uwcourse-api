@@ -48,10 +48,6 @@ exports.validate_faculty = (faculty) => {
 
 
 function validate_program(faculty, program) {
-    console.log("faculty:");
-    console.log(faculty);
-    console.log("program:");
-    console.log(program);
     return new Promise((resolve, reject) => {
         if (valid_programs[faculty].includes(program)){
             resolve(true);

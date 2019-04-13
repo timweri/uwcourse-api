@@ -4,7 +4,7 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const router = express.Router();
-const stage = require('./config');
+const stage = require('./config/config');
 const routes = require('./routes/index.js');
 
 app.use(bodyParser.urlencoded({

@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const argon2 = require('argon2');
-
-const faculty_program_validator = require('../../utils/database/validators/validate_faculty_program');
+const Timestamp = require('../utils/timestamp');
+const faculty_program_validator = require('../utils/database/validators/validate_faculty_program');
 const OverallRatingType = require('./types/OverallRating');
 
 /**
@@ -54,20 +54,12 @@ const UserSchema = new Schema({
         type: String,
         required: [true, 'Program required'],
         validate: {
-            //validator: faculty_program_validator.validate_faculty(this.faculty, this.program),
             validator: function() {
-                console.log("faculty:");
-                console.log(this.faculty);
-                console.log("program:");
-                console.log(this.program);
                 return new Promise((resolve, reject) => {
-                    console.log(faculty_program_validator.valid_programs[this.faculty]);
                     if (faculty_program_validator.valid_programs[this.faculty].includes(this.program)){
-                        console.log('true');
                         resolve(true);
                     }
                     else{
-                        console.log('false');
                         reject(false);
                     }
                 });
@@ -77,47 +69,30 @@ const UserSchema = new Schema({
     },
     favourite_courses: [CompactCourse],
     terms: [CompactTerm],
+    created_at: {
+        type: String,
+        default: Timestamp.generateTimestamp
+    },
+    last_updated_at: {
+        type: String,
+        default: Timestamp.generateTimestamp
+    }
 });
 
 
 // encrypt password before save
 UserSchema.pre('save', async function(next) {
     const user = this;
-    if(!user.isModified || !user.isNew) { // don't rehash if it's an old user
-        console.log('test0');
+
+    try {
+        const hash = await argon2.hash(user.hashed_password);
+        user.hashed_password = hash;
         next();
-    } else {
-        console.log('test1');
-        try {
-            console.log('test2');
-            const hash = await argon2.hash(user.hashed_password);
-            console.log(hash);
-            user.hashed_password = hash;
-            next();
-        } catch (err) {
-            console.log(err);
-            console.log('Error hashing password for user', user.name);
-            next(err);
-        }
+    } catch (err) {
+        console.log('Error hashing password for user', user.name);
+        next(err);
     }
 });
 
-// // encrypt password before save
-// UserSchema.pre('save', function(next) {
-//     const user = this;
-//     if(!user.isModified || !user.isNew) { // don't rehash if it's an old user
-//       next();
-//     } else {
-//       argon2.hash(user.hashed_password, stage.saltingRounds, function(err, hash) {
-//         if (err) {
-//           console.log('Error hashing password for user', user.name);
-//           next(err);
-//         } else {
-//           user.hashed_password = hash;
-//           next();
-//         }
-//       });
-//     }
-//   });
 
 module.exports = mongoose.model('User', UserSchema);

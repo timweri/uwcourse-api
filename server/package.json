@@ -4,6 +4,8 @@
   "description": "A backend api for UWcourse",
   "main": "server.js",
   "dependencies": {
+    "mongo-express": "^0.52.1",
+    "app-root-path": "^2.1.0",
     "argon2": "^0.21.0",
     "dotenv": "^6.2.0",
     "express": "^4.16.4",
