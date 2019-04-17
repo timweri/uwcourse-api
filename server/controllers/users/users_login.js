@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken')
 const approot = require('app-root-path');
 const { JWT_SECRET } = require(`${approot}/config/config`);
 
+// Login user
 exports.users_login = (req, res) => {
   let result = {};
   let status = 200;
