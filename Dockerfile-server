@@ -1,21 +1,8 @@
-FROM node:10.15-alpine
+FROM node:10-alpine
 MAINTAINER Duc Thanh Nguyen (ng.duc.tahn@gmail.com)
 
-# Set environment
-ENV NODE_ENV development
-
-# Select Working Directory
-WORKDIR /uwcourse-server
-
-# Copy the app folder to the Working Directory
-COPY ./server /uwcourse-server
-
-# Remove symlinks
-RUN rm -rf models utils
-
-# Copy the original symlink targets
-COPY ./models /uwcourse-server/models
-COPY ./utils /uwcourse-server/utils
+# Expose port 5000
+EXPOSE 5000
 
 # Install python to compile argon2
 RUN apk add --update \
@@ -26,12 +13,30 @@ RUN apk add --update \
   && pip install virtualenv \
   && rm -rf /var/cache/apk/*
 
-# Install all node packages
+# Install some node packages
 RUN npm i -g node-gyp
+
+# Set environment
+ENV NODE_ENV dev
+
+# Select Working Directory
+WORKDIR /uwcourse-server
+
+# Copy package.json
+COPY ./server/package.json /uwcourse-server/package.json
+
+# Install all node packages
 RUN npm i
 
-# Expose port 5000
-EXPOSE 5000
+# Copy the app folder to the Working Directory
+COPY ./server /uwcourse-server
+
+# Remove symlinks
+RUN rm -rf models utils
+
+# Copy the original symlink targets
+COPY ./models /uwcourse-server/models
+COPY ./utils /uwcourse-server/utils
 
 # Start the API
 CMD ["node", "server.js"]

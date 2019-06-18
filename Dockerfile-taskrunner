@@ -2,10 +2,16 @@ FROM node:10.15-alpine
 MAINTAINER Duc Thanh Nguyen (ng.duc.tahn@gmail.com)
 
 # Set environment
-ENV NODE_ENV development
+ENV NODE_ENV dev
 
 # Select Working Directory
 WORKDIR /uwcourse-taskrunner
+
+# Copy package.json
+COPY ./taskrunner/package.json /uwcourse-taskrunner/package.json
+
+# Install all node packages
+RUN npm i
 
 # Copy the app folder to the Working Directory
 COPY ./taskrunner /uwcourse-taskrunner
@@ -20,9 +26,6 @@ COPY ./utils /uwcourse-taskrunner/utils
 # Create an empty data folder to store database state
 # This avoid having to check if the folder exists using node.js filesystem
 RUN mkdir -p /uwcourse-taskrunner/uwopendata/data
-
-# Install all node packages
-RUN npm i
 
 # Start the API
 CMD ["node", "start.js"]
