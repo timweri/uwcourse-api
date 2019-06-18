@@ -1,11 +1,8 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const approot = require('app-root-path');
-const Timestamp = require(`${approot}/utils/timestamp`);
-const CompactCourseRatingType = require('./types/CompactCourseRating');
-const CompactInstructorRatingType = require('./types/CompactInstructorRating');
-const OverallRatingType = require('./types/OverallRating');
+const OverallRatingSchema = require('./subschemas/OverallRating');
+const CourseScheduleSchema = require('./CourseSchedule');
 
 /**
  * Course Schema Subdocuments
@@ -19,8 +16,8 @@ const OfferingSchema = new Schema({
     renison: Boolean,
     renison_only: Boolean,
     conrad_grebel: Boolean,
-    conrad_grebel_only: Boolean
-});
+    conrad_grebel_only: Boolean,
+}, {_id: false});
 
 /**
  * Course Schema
@@ -29,51 +26,45 @@ const OfferingSchema = new Schema({
 const CourseSchema = new Schema({
         title: {
             type: String,
-            required: [true, 'Course title required'],
+            required: true,
         },
         subject: {
             type: String,
-            required: [true, 'Course subject required'],
-            index: true
+            required: true,
+            index: true,
         },
         catalog_number: {
             type: String,
-            required: [true, 'Course catalog number required'],
-            index: true
+            required: true,
+            index: true,
         },
-        url: {
-            type: String
-        },
+        url: String,
         // This is the course id assigned by UW Registrar
         // course_id is not unique due to crosslisting
         course_id: {
             type: String,
-            required: [true, 'UW Course ID required'],
-            index: true
+            required: true,
+            index: true,
         },
         units: {
             type: Number,
-            required: [true, 'Course unit worth required']
+            required: true,
         },
         description: String,
         academic_level: String,
         instructions: [String],
         instructors: [{
-            id: {
-                type: Schema.Types.ObjectId,
-                required: [true, 'Instructor id required'],
-                ref: 'Instructor'
-            },
+            _id: {type: Schema.Types.ObjectId, ref: 'Instructor'},
             avatar_url: String,
             name: String,
-            easy_rating: OverallRatingType('Instructor easy'),
-            liked_rating: OverallRatingType('Instructor liked'),
-            ratings: [CompactInstructorRatingType]
+            easy_rating: OverallRatingSchema,
+            liked_rating: OverallRatingSchema,
+            ratings: [{type: Schema.Types.ObjectId, ref: 'InstructorRating'}],
         }],
-        easy_rating: OverallRatingType('Course easy'),
-        useful_rating: OverallRatingType('Course useful'),
-        liked_rating: OverallRatingType('Course liked'),
-        ratings: [CompactCourseRatingType],
+        easy_rating: OverallRatingSchema,
+        useful_rating: OverallRatingSchema,
+        liked_rating: OverallRatingSchema,
+        ratings: [{type: Schema.Types.ObjectId, ref: 'CourseRating'}],
         prerequisites: String,
         antirequisites: String,
         corequisites: String,
@@ -84,23 +75,51 @@ const CourseSchema = new Schema({
         needs_instructor_consent: Boolean,
         notes: String,
         extra: [],
+        schedule: {
+            type: Map,
+            of: {
+                type: Map,
+                of: {
+                    type: Schema.Types.ObjectId,
+                    required: true,
+                    ref: 'CourseSchedule',
+                },
+            },
+        },
         updated_at: {
-            type: String,
-            default: Timestamp.generateTimestamp
-        }
-    },
-    {
-        upsertMatchFields: ['course_id', 'subject', 'catalog_number']
+            type: Date,
+            default: new Date(),
+        },
+        created_at: {
+            type: Date,
+            immutable: true,
+            default: new Date(),
+        },
     }
 );
 
 CourseSchema.pre('save', function (next) {
-    this._update.updated_at = Timestamp.generateTimestamp();
+    this._update.updated_at = new Date();
+    next();
+});
+
+CourseSchema.pre('findOneAndUpdate', function (next) {
+    this._update.updated_at = new Date();
     next();
 });
 
 CourseSchema.pre('update', function (next) {
-    this._update.updated_at = Timestamp.generateTimestamp();
+    this._update.updated_at = new Date();
+    next();
+});
+
+CourseSchema.pre('updateOne', function (next) {
+    this._update.updated_at = new Date();
+    next();
+});
+
+CourseSchema.pre('updateMany', function (next) {
+    this._update.updated_at = new Date();
     next();
 });
 
