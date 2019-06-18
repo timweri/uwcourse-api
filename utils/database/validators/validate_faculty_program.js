@@ -1,5 +1,5 @@
-const possible_faculty = ['Applied Health Sciences', 'Arts', 'Engineering', 'Environment', 'Mathematics', 'Science'];
-const valid_programs = {
+const POSSIBLE_FACULTY = ['Applied Health Sciences', 'Arts', 'Engineering', 'Environment', 'Mathematics', 'Science'];
+const VALID_PROGRAMS = {
     'Applied Health Sciences': ['Health Studies', 'Kinesiology', 'Public Health', 'Recreation and Leisure Studies',
         'Recreation and Sport Business', 'Therapeutic Recreation', 'Tourism Development'],
     'Arts': ['Accounting and Financial Management', 'Anthropology', 'Classical Studies',
@@ -29,37 +29,21 @@ const valid_programs = {
         'Physical Sciences', 'Chemistry', 'Life Physics', 'Earth Sciences', 'Materials and Nanosciences',
         'Mathematical Physics', 'Medicinal Chemistry', 'Physics', 'Physics and Astronomy', 'Science and Aviation',
         'Science and Business'],
-    'Others': ['Optometry', 'Pharmacy', 'Social Work']
+    'Others': ['Optometry', 'Pharmacy', 'Social Work'],
 };
 
-exports.possible_faculty = possible_faculty;
-exports.valid_programs = valid_programs;
+exports.POSSIBLE_FACULTY = POSSIBLE_FACULTY;
+exports.VALID_PROGRAMS = VALID_PROGRAMS;
 
 // Takes in a String representing a faculty
 // Check if the faculty is valid
-exports.validate_faculty = (faculty) => {
-    return new Promise((resolve, reject) => {
-        if (possible_faculty.includes(faculty))
-            resolve(true);
-        else
-            reject(false);
-    });
+exports.validateFaculty = (faculty) => {
+    return POSSIBLE_FACULTY.includes(faculty);
 };
 
-
-function validate_program(faculty, program) {
-    console.log("faculty:");
-    console.log(faculty);
-    console.log("program:");
-    console.log(program);
-    return new Promise((resolve, reject) => {
-        if (valid_programs[faculty].includes(program)){
-            resolve(true);
-        }
-        else{
-            reject(false);
-        }        
-    });
-}
-
-exports.validate_program = validate_program;
+exports.validateProgram = async (faculty, program) => {
+    if (POSSIBLE_FACULTY.includes(faculty))
+        return VALID_PROGRAMS[faculty].includes(program);
+    else
+        return false;
+};
