@@ -1,16 +1,19 @@
 {
   "name": "uwcourseapi",
   "version": "0.0.1",
-  "description": "A backend api for UWcourse",
+  "description": "A backend API for UWcourse",
   "main": "server.js",
   "dependencies": {
+    "app-root-path": "^2.2.1",
     "argon2": "^0.21.0",
-    "dotenv": "^6.2.0",
     "express": "^4.16.4",
     "jsonwebtoken": "^8.5.0",
     "mongodb": "^3.1.13",
     "mongoose": "^5.4.15",
-    "require.all": "^2.0.4"
+    "node-gyp": "^5.0.0",
+    "require-dir": "^1.2.0",
+    "require.all": "^2.0.4",
+    "winston": "^3.2.1"
   },
   "devDependencies": {
     "eslint": "^5.15.0",
