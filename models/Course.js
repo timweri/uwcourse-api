@@ -69,22 +69,19 @@ const CourseSchema = new Schema({
         antirequisites: String,
         corequisites: String,
         crosslistings: String,
-        terms_offered: [{type: Schema.Types.ObjectId, ref: 'Term'}],
+        term_id_offered: [{type: String, required: true}],
         offerings: OfferingSchema,
         needs_department_consent: Boolean,
         needs_instructor_consent: Boolean,
         notes: String,
         extra: [],
-        schedule: {
-            type: Map,
-            of: {
-                type: Map,
-                of: {
-                    type: Schema.Types.ObjectId,
-                    required: true,
-                    ref: 'CourseSchedule',
-                },
-            },
+        class_number_map: {
+            type: Map, // key is term_id
+            of: [{
+                // represents class_number
+                type: String,
+                required: true,
+            }],
         },
         updated_at: {
             type: Date,

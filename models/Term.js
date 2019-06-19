@@ -7,19 +7,21 @@ const Schema = mongoose.Schema;
 
 const TermSchema = new Schema({
     term_id: {
-        type: Number,
+        type: String,
+        index: true,
+        unique: true,
         required: true,
     },
     year: {
         type: Number,
-        required: true
+        required: true,
     },
     term_season: {
         type: String,
         required: true,
         enum: {
             values: ['Spring', 'Fall', 'Winter'],
-        }
+        },
     },
     courses: [{
         type: Schema.Types.ObjectId,

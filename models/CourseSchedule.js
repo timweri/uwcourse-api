@@ -51,9 +51,24 @@ const ClassScheduleSchema = new Schema({
  */
 
 const CourseScheduleSchema = new Schema({
+    subject: {
+        type: String,
+        required: true,
+        index: true,
+    },
+    catalog_number: {
+        type: String,
+        required: true,
+        index: true,
+    },
+    term_id: {
+        type: String,
+        required: true,
+    },
     class_number: {
         type: Number,
         required: true,
+        index: true,
     },
     section: {
         type: String,
