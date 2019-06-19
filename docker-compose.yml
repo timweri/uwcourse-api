@@ -18,6 +18,8 @@ services:
     container_name: uwcourse-taskrunner
     links:
       - mongodb
+    env_file:
+      - taskrunner.env
     stdin_open: true
     tty: true
   mongodb:

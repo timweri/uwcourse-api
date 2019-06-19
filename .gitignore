@@ -93,3 +93,6 @@ coverage
 
 # Benchmarking
 benchmarks/graphs
+
+# .env files
+*.env
