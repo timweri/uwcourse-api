@@ -6,7 +6,8 @@ const immutable = require('mongoose-immutable-plugin');
 mongoose.plugin(bulkOp);
 mongoose.plugin(immutable);
 
-const uwopendataTasks = require('require.all')('./uwopendata/tasks');
+const requireDir = require('requiredir');
+const uwopendataTasks = requireDir('./uwopendata/tasks');
 const logger = require('./config/winston')();
 
 mongoose.connect('mongodb://mongodb:27017/uwcourseapi', {useNewUrlParser: true, useCreateIndex: true});
@@ -19,8 +20,8 @@ mongoose.connection.on('error', () => {
 mongoose.connection.once('open', async () => {
     logger.info('Successfully connected to database uwcourseapi');
 
-    await uwopendataTasks.scrape_courses({first_run: true});
-    await uwopendataTasks.scrape_courses_schedule({first_run: true});
+    await uwopendataTasks.scrape_courses();
+    await uwopendataTasks.scrape_courses_schedule();
     //cron.schedule('*/5 * * * *', async () => {
     //    await uwopendataTasks.scrape_courses();
     //    logger.info('Task `scrape_courses` completed');

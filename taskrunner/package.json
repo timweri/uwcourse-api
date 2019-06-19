@@ -16,7 +16,7 @@
     "node-cron": "^2.0.3",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
-    "require.all": "^2.0.4",
+    "requiredir": "^1.0.7",
     "winston": "^3.2.1"
   }
 }
