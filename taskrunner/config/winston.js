@@ -1,12 +1,12 @@
-const appRoot = require('app-root-path');
+const approot = require('app-root-path');
 const winston = require('winston');
 
-var options = {
+let options = {
     file: {
         level: 'info',
-        filename: `${appRoot}/logs/info.log`,
+        filename: `${approot}/logs/info.log`,
         handleExceptions: true,
-        json: true,
+        format: winston.format.json(),
         timestamp: true,
         maxsize: 5242880, // 5MB
         maxFiles: 5,
@@ -15,7 +15,7 @@ var options = {
     console: {
         level: 'debug',
         handleExceptions: true,
-        json: false,
+        format: winston.format.simple(),
         colorize: true,
     },
 };
@@ -23,10 +23,13 @@ var options = {
 const logger = winston.createLogger({
     transports: [
         new winston.transports.File(options.file),
-        new winston.transports.Console(options.console)
     ],
     exitOnError: false, // do not exit on handled exceptions
 });
+
+if (process.env.NODE_ENV !== 'production') {
+    logger.add(new winston.transports.Console(options.console));
+}
 
 module.exports = (label) => {
     if (label) {
@@ -42,6 +45,9 @@ module.exports = (label) => {
             },
             verbose: (msg) => {
                 logger.verbose(`[${label}] ${msg}`);
+            },
+            warn: (msg) => {
+                logger.warn(`[${label}] ${msg}`);
             },
         };
     }

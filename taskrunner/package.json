@@ -9,9 +9,10 @@
   "author": "Duc Thanh Nguyen",
   "license": "ISC",
   "dependencies": {
-    "@meanie/mongoose-upsert-many": "^1.5.1",
     "app-root-path": "^2.1.0",
     "mongoose": "^5.4.16",
+    "mongoose-bulkop": "^1.0.0",
+    "mongoose-immutable-plugin": "^1.0.1",
     "node-cron": "^2.0.3",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",

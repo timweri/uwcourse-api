@@ -1,8 +1,10 @@
 const cron = require('node-cron');
 
 const mongoose = require('mongoose');
-const upsertMany = require('@meanie/mongoose-upsert-many');
-mongoose.plugin(upsertMany);
+const bulkOp = require('mongoose-bulkop');
+const immutable = require('mongoose-immutable-plugin');
+mongoose.plugin(bulkOp);
+mongoose.plugin(immutable);
 
 const uwopendataTasks = require('require.all')('./uwopendata/tasks');
 const logger = require('./config/winston')();
