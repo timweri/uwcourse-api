@@ -43,6 +43,13 @@ module.exports = async (options) => {
 
     let listCourses; // an array of all courses in the format given by /courses
     let dictCourses = {}; // dictionary of courses by course_id
+    let currentTermId;
+
+    {
+        logger.verbose(`Requesting current term id`);
+        currentTermId = (await uwapi.get(`/terms/list`, {})).data.current_term.toString();
+        logger.verbose(`Current term id: ${currentTermId}`);
+    }
 
     // request for a list of all courses
     // remove the message field of the response
@@ -51,7 +58,7 @@ module.exports = async (options) => {
     logger.verbose(`Received a list of ${listCourses.length} courses`);
 
     // Take only 1000 for testing
-    listCourses = listCourses.slice(0, 100);
+    listCourses = listCourses.slice(0, 50);
 
     // create a dict of courses from listCourses
     for (const item of listCourses) {
@@ -106,11 +113,43 @@ module.exports = async (options) => {
                 await timeOut(options.batchDelay);
 
                 // Upsert only those not found in the archive
-                let listUpsertItems = [];
-                for (const e of batchResult) {
-                     listUpsertItems.push(e.data);
+                let bulkOp = Course.collection.initializeUnorderedBulkOp();
+                for (const item of batchResult) {
+                    let itemData = item.data;
+                    bulkOp.find({
+                        course_id: itemData.course_id,
+                        subject: itemData.subject,
+                        catalog_number: itemData.catalog_number,
+                        term_id: currentTermId,
+                    }).upsert().updateOne({
+                        $set: {
+                            title: itemData.title,
+                            url: itemData.url,
+                            units: itemData.units,
+                            academic_level: itemData.academic_level,
+                            description: itemData.description,
+                            instructions: itemData.instructions,
+                            prerequisites: itemData.prerequisites,
+                            corequisites: itemData.corequisites,
+                            crosslistings: itemData.crosslistings,
+                            terms_offered: itemData.terms_offered,
+                            offerings: itemData.offerings,
+                            needs_department_consent: itemData.needs_department_consent,
+                            needs_instructor_consent: itemData.needs_instructor_consent,
+                            notes: itemData.notes,
+                            extra: itemData.extra,
+                            updated_at: new Date(),
+                        },
+                        $setOnInsert: {
+                            created_at: new Date(),
+                            course_id: itemData.course_id,
+                            subject: itemData.subject,
+                            term_id: currentTermId,
+                            catalog_number: itemData.catalog_number,
+                        },
+                    });
                 }
-                const upsertResult = await Course.bulkUpsertUpdateOne(listUpsertItems, ['course_id', 'subject', 'catalog_number']);
+                const upsertResult = await bulkOp.execute();
                 logger.verbose(`Successfully created ${upsertResult.nUpserted} and modified ${upsertResult.nModified}` +
                     ` courses on database`);
             }
@@ -122,5 +161,5 @@ module.exports = async (options) => {
         }
     }
 
-    logger.info(`${TAG} succeeded`);
+    logger.info(`${TAG} finished`);
 };

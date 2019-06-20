@@ -48,7 +48,7 @@ const get = async (resource, qs) => {
             if (response != null) break;
         } catch (error) {
             logger.error(`GET request failed at ${options.uri} with ${error}`);
-            if (i === config.uwopendata.retries - 1) throw error;
+            if (i >= config.uwopendata.retries - 1) throw error;
             else {
                 logger.warn(`Retrying GET request at ${options.uri}`);
                 await timeout(delay);

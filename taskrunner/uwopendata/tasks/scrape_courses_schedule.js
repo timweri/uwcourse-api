@@ -12,7 +12,7 @@ const TAG = "scrape_courses_schedule";
  *
  * First, read the latest archived list of courses created by `scrape_courses`.
  * Terminates if the archived list of not found.
- * Then, for each course in the list, send a request to 
+ * Then, for each course in the list, send a request to
  * `/courses/subject/catalog_number/schedule` to obtain the new schedule.
  *
  * First, request all the available course.
@@ -37,7 +37,7 @@ module.exports = async (options) => {
     }, options);
 
     let listCourses = []; // list of courses by course_id
-    let currentTermId = 0; // the id of the current term
+    let currentTermId; // the id of the current term
 
     // Read the list of courses created by scrape_courses
     // Terminates if the list is not found
@@ -52,8 +52,9 @@ module.exports = async (options) => {
     }
 
     {
-        // Request for code of current term
-        currentTermId = (await uwapi.get(`/terms/list`, {})).data.current_term;
+        logger.verbose(`Requesting current term id`);
+        currentTermId = (await uwapi.get(`/terms/list`, {})).data.current_term.toString();
+        logger.verbose(`Current term id: ${currentTermId}`);
     }
 
     let queue = []; // a queue of HTTP request, each item is for one course
@@ -62,9 +63,10 @@ module.exports = async (options) => {
         queue.push({endpoint: `/courses/${e.subject}/${e.catalog_number}/schedule`, qs: {}});
     }
 
-    let bulkOperationCourse = Course.collection.initializeUnorderedBulkOp();
-    let bulkOperationScheduleItems = [];
     let nSuccessfuleScheduleQuery = 0;
+    let nScheduleModified = 0;
+    let nScheduleUpserted = 0;
+    let bulkOperationScheduleItems = [];
 
     const requestInBatch = async () => {
         while (queue.length > 0) {
@@ -75,62 +77,100 @@ module.exports = async (options) => {
             await timeout(options.batchDelay);
 
             nSuccessfuleScheduleQuery += batchResult.length;
+            let bulkCourseScheduleOp = CourseSchedule.collection.initializeUnorderedBulkOp();
 
             // For each course
             for (let courseItem of batchResult) {
                 if (courseItem.meta.status === 204) continue;
                 let courseItemData = courseItem.data;
                 for (let section of courseItemData) {
-                    bulkOperationCourse.find({
-                        subject: section.subject,
-                        catalog_number: section.catalog_number,
-                    }).updateOne({
-                        $addToSet: {[`class_number_map.${currentTermId}`]: section.class_number.toString()},
-                        $set: {updated_at: new Date()},
-                    });
+                    section.class_number = section.class_number.toString();
                     bulkOperationScheduleItems.push({
                         subject: section.subject,
                         catalog_number: section.catalog_number,
-                        term_id: currentTermId,
-                        campus: section.campus,
-                        note: section.note,
                         class_number: section.class_number,
-                        enrollment_capacity: section.enrollment_capacity,
-                        enrollment_total: section.enrollment_total,
-                        waiting_capacity: section.waiting_capacity,
-                        waiting_total: section.waiting_total,
-                        reserves: section.reserves,
-                        classes: section.classes,
-                        last_updated: new Date(section.last_updated),
-                        updated_at: new Date(),
+                    });
+                    bulkCourseScheduleOp.find({
+                        subject: section.subject,
+                        catalog_number: section.catalog_number,
+                        term_id: currentTermId,
+                        class_number: section.class_number,
+                    }).upsert().updateOne({
+                        $set: {
+                            campus: section.campus,
+                            note: section.note,
+                            enrollment_capacity: section.enrollment_capacity,
+                            enrollment_total: section.enrollment_total,
+                            waiting_capacity: section.waiting_capacity,
+                            waiting_total: section.waiting_total,
+                            reserves: section.reserves,
+                            classes: section.classes,
+                            updated_at: new Date(section.last_updated),
+                        },
+                        $setOnInsert: {
+                            subject: section.subject,
+                            catalog_number: section.catalog_number,
+                            term_id: currentTermId,
+                            class_number: section.class_number,
+                        },
                     });
                 }
+            }
+
+            try {
+                const bulkOpResult = await bulkCourseScheduleOp.execute();
+                nScheduleModified += bulkOpResult.nModified;
+                nScheduleUpserted += bulkOpResult.nUpserted;
+            } catch (err) {
+                logger.error(err);
+                logger.error(`Failed to update Course Schedule database`);
+                throw err;
             }
         }
     };
 
     try {
         await requestInBatch();
-        logger.verbose(`Fetched schedules of ${nSuccessfuleScheduleQuery}/${listCourses.length} courses`);
+        logger.verbose(`Processed schedules of ${nSuccessfuleScheduleQuery}/${listCourses.length} courses`);
+        logger.verbose(`Created ${nScheduleUpserted} and modified ${nScheduleModified} ` +
+            `class sections on Course Schedule database`);
     } catch (error) {
         logger.error(error);
-        logger.error(`Failed to fetch schedules of ${listCourses.length} courses`);
+        logger.error(`Failed to process schedules of ${listCourses.length} courses`);
         return;
     }
 
     try {
-        const bulkCourseScheduleOpResult = await CourseSchedule.bulkUpsertReplaceOne(bulkOperationScheduleItems, ['subject', 'catalog_number', 'class_number']);
-        logger.verbose(`Successfully created ${bulkCourseScheduleOpResult.nUpserted} and modified ${bulkCourseScheduleOpResult.nModified} ` +
-            `class sections on Course Schedule database`);
-    } catch (err) {
-        logger.error(`Failed to update Course Schedule model`);
-        logger.error(err);
-        throw Error(err);
-    }
-
-    try {
-        const bulkCourseOpResult = await bulkOperationCourse.execute();
-        logger.verbose(`Successfully modified ${bulkCourseOpResult.nModified} courses on database`);
+        let scheduleFindConditions = [];
+        for (const item of bulkOperationScheduleItems) {
+            scheduleFindConditions.push({
+                $and: [{
+                    subject: item.subject,
+                    catalog_number: item.catalog_number,
+                    term_id: currentTermId,
+                    class_number: item.class_number,
+                }],
+            });
+        }
+        bulkOperationScheduleItems = null;
+        const scheduleFindResult = await CourseSchedule.find({$or: scheduleFindConditions}, ['_id', 'subject', 'catalog_number']);
+        scheduleFindConditions = null;
+        let courseBulkOperation = Course.collection.initializeUnorderedBulkOp();
+        for (const item of scheduleFindResult) {
+            courseBulkOperation.find({
+                subject: item.subject,
+                catalog_number: item.catalog_number,
+                term_id: currentTermId,
+                schedule: {$ne: item._id},
+            }).updateOne({
+                $addToSet: {
+                    schedule: item._id,
+                },
+                $set: {updated_at: new Date()},
+            });
+        }
+        const bulkCourseOpResult = await courseBulkOperation.execute();
+        logger.verbose(`Successfully added ${bulkCourseOpResult.nModified} schedules on Course database`);
     } catch (err) {
         logger.error(`Failed to update Course Schedule model`);
         logger.error(err);

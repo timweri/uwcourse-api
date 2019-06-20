@@ -63,10 +63,11 @@ const CourseScheduleSchema = new Schema({
     },
     term_id: {
         type: String,
+        index: true,
         required: true,
     },
     class_number: {
-        type: Number,
+        type: String,
         required: true,
         index: true,
     },
@@ -93,7 +94,7 @@ const CourseScheduleSchema = new Schema({
     reserves: [CourseScheduleReserveSchema],
     classes: [ClassScheduleSchema],
     note: String,
-    last_updated: {
+    updated_at: {
         type: Date,
         required: true,
     },
