@@ -1,5 +1,8 @@
 const cron = require('node-cron');
 
+const path = require('path');
+const TAG = path.basename(__filename);
+
 const mongoose = require('mongoose');
 const bulkOp = require('mongoose-bulkop');
 const immutable = require('mongoose-immutable-plugin');
@@ -8,7 +11,7 @@ mongoose.plugin(immutable);
 
 const requireDir = require('requiredir');
 const uwopendataTasks = requireDir('./uwopendata/tasks');
-const logger = require('./config/winston')();
+const logger = require('./config/winston')(TAG);
 
 mongoose.connect('mongodb://mongodb:27017/uwcourseapi', {useNewUrlParser: true, useCreateIndex: true});
 

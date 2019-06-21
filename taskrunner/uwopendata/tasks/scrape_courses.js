@@ -1,5 +1,6 @@
 const approot = require('app-root-path');
-const TAG = "scrape_courses";
+const path = require('path');
+const TAG = path.basename(__filename);
 const logger = require(`${approot}/config/winston`)(TAG);
 const fs = require('fs');
 const Course = require(`${approot}/models/Course`);

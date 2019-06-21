@@ -1,5 +1,6 @@
 const approot = require('app-root-path');
-const TAG = "scrape_class_schedule";
+const path = require('path');
+const TAG = path.basename(__filename);
 const logger = require(`${approot}/config/winston`)(TAG);
 const fs = require('fs');
 const Course = require(`${approot}/models/Course`);
@@ -105,6 +106,7 @@ module.exports = async (options) => {
                             waiting_total: section.waiting_total,
                             reserves: section.reserves,
                             classes: section.classes,
+                            section: section.section,
                             updated_at: new Date(section.last_updated),
                         },
                         $setOnInsert: {

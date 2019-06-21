@@ -1,7 +1,9 @@
 const approot = require('app-root-path');
+const path = require('path');
+const TAG = path.basename(__filename);
 const config = require(`${approot}/config/config`);
 const rp = require('request-promise-native');
-const logger = require(`${approot}/config/winston`)('UW OpenData API');
+const logger = require(`${approot}/config/winston`)(TAG);
 const timeout = require(`${approot}/utils/delay`);
 
 const filterResponseCourse = (response) => {
