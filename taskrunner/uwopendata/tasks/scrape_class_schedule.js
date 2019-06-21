@@ -1,11 +1,11 @@
 const approot = require('app-root-path');
-const logger = require(`${approot}/config/winston`)('scape_courses_schedule task');
+const TAG = "scrape_class_schedule";
+const logger = require(`${approot}/config/winston`)(TAG);
 const fs = require('fs');
 const Course = require(`${approot}/models/Course`);
 const CourseSchedule = require(`${approot}/models/CourseSchedule`);
 const uwapi = require('../config/uwopendata_api');
 const timeout = require(`${approot}/utils/delay`);
-const TAG = "scrape_courses_schedule";
 
 /**
  * Update our course schedule with new changes from UW API
@@ -45,8 +45,8 @@ module.exports = async (options) => {
         listCourses = JSON.parse(await fs.promises.readFile(options.listCoursesArchivePath, options.archiveEncoding));
     } catch (err) {
         if (err.code === 'ENOENT') {
-            logger.warning(`${options.listCoursesArchivePath} does not exist`);
-            logger.warning(`scrape_courses_schedule failed`);
+            logger.error(`${options.listCoursesArchivePath} does not exist`);
+            logger.warning(`${TAG} failed`);
             return;
         } else throw Error(err);
     }
@@ -137,6 +137,7 @@ module.exports = async (options) => {
     } catch (error) {
         logger.error(error);
         logger.error(`Failed to process schedules of ${listCourses.length} courses`);
+        logger.warning(`${TAG} failed`);
         return;
     }
 
@@ -172,10 +173,11 @@ module.exports = async (options) => {
         const bulkCourseOpResult = await courseBulkOperation.execute();
         logger.verbose(`Successfully added ${bulkCourseOpResult.nModified} schedules on Course database`);
     } catch (err) {
-        logger.error(`Failed to update Course Schedule model`);
         logger.error(err);
+        logger.error(`Failed to update Course Schedule model`);
+        logger.warning(`${TAG} failed`);
         throw Error(err);
     }
 
-    logger.info(`scrape_courses_schedule succeeded`);
+    logger.info(`${TAG} finished`);
 };

@@ -1,11 +1,10 @@
 const approot = require('app-root-path');
-const logger = require(`${approot}/config/winston`)('scape_courses task');
+const TAG = "scrape_courses";
+const logger = require(`${approot}/config/winston`)(TAG);
 const fs = require('fs');
 const Course = require(`${approot}/models/Course`);
 const uwapi = require('../config/uwopendata_api');
-const coursediff = require('../utils/course_diff');
 const timeOut = require(`${approot}/utils/delay`);
-const TAG = "scrape_courses";
 
 /**
  * Update our course details with new changes from UW OpenData API
@@ -82,6 +81,8 @@ module.exports = async (options) => {
         logger.verbose(`Updated ${options.listCoursesArchivePath}`);
     } catch (err) {
         logger.error(err);
+        logger.error(`Saving course array to ${options.listCoursesArchivePath} failed`);
+        logger.warning(`${TAG} failed`);
         throw Error(err);
     }
 
@@ -91,6 +92,8 @@ module.exports = async (options) => {
         logger.verbose(`Updated ${options.dictCoursesArchivePath}`);
     } catch (err) {
         logger.error(err);
+        logger.error(`Saving course details as dictionary to ${options.dictCoursesArchivePath} failed`);
+        logger.warning(`${TAG} failed`);
         throw Error(err);
     }
     dictCourses = null;
@@ -157,7 +160,10 @@ module.exports = async (options) => {
         try {
             await updateInBatch();
         } catch (error) {
-            logger.error(`Error during batch processing: ${error}`)
+            logger.error(error);
+            logger.error(`Error during batch processing`);
+            logger.warning(`${TAG} failed`);
+            return;
         }
     }
 
