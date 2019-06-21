@@ -14,10 +14,7 @@ const timeOut = require(`${approot}/utils/delay`);
  * First, request a list of all available courses.
  * Then, send one request for details of each course.
  *
- * Compare result with the saved collection from the previous execution of the task.
- * If the collection does not exist, update every courses.
- * If the collection exists, update only the difference.
- * New courses are created.
+ * Update the Course database.
  *
  * At the end, save courses as two local json files:
  *  - courses.json: a dictionary of all courses organized by course_id (includes
@@ -154,7 +151,7 @@ module.exports = async (options) => {
                     });
                 }
                 const upsertResult = await bulkOp.execute();
-                logger.verbose(`Successfully created ${upsertResult.nUpserted} and modified ${upsertResult.nModified}` +
+                logger.info(`Successfully created ${upsertResult.nUpserted} and modified ${upsertResult.nModified}` +
                     ` courses on database`);
             }
         };

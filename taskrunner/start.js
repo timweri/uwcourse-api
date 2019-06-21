@@ -25,8 +25,14 @@ mongoose.connection.once('open', async () => {
 
     await uwopendataTasks.scrape_courses();
     await uwopendataTasks.scrape_class_schedule();
-    //cron.schedule('*/5 * * * *', async () => {
-    //    await uwopendataTasks.scrape_courses();
-    //    logger.info('Task `scrape_courses` completed');
-    //});
+
+    // Scrape courses on the first day of every 2 month
+    cron.schedule('0 0 1 */2 *', async () => {
+        await uwopendataTasks.scrape_courses();
+    });
+
+    // Scrape enrollment every hour
+    cron.schedule('0 * * * *', async () => {
+        await uwopendataTasks.scrape_courses_enrollment();
+    });
 });

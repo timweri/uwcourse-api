@@ -14,14 +14,11 @@ const timeout = require(`${approot}/utils/delay`);
  * First, read the latest archived list of courses created by `scrape_courses`.
  * Terminates if the archived list of not found.
  * Then, for each course in the list, send a request to
- * `/courses/subject/catalog_number/schedule` to obtain the new schedule.
+ * `/courses/subject/catalog_number/schedule` to obtain the new schedule for the current term.
  *
- * First, request all the available course.
- * Compare the updated_at timestamp it with the saved dictionary of schedules.
- * If the collection does not exist, update every Course and update the dictionary.
- * If the collection exists, update only the ones that differs in timestamp.
- *
- * For now, we are only concerned with current term schedules.
+ * Update the Course Schedule model to update existing schedules or create new ones.
+ * Query the Course Schedule model to find the _id of schedules.
+ * Then, update the schedule of the Course model with this this _id.
  *
  * @param options
  * @returns {Promise<void>}
@@ -34,7 +31,6 @@ module.exports = async (options) => {
         archiveEncoding: 'utf8',
         batchSize: 300,
         batchDelay: 500,
-        firstRun: false,
     }, options);
 
     let listCourses = []; // list of courses by course_id
@@ -134,7 +130,7 @@ module.exports = async (options) => {
     try {
         await requestInBatch();
         logger.verbose(`Processed schedules of ${nSuccessfuleScheduleQuery}/${listCourses.length} courses`);
-        logger.verbose(`Created ${nScheduleUpserted} and modified ${nScheduleModified} ` +
+        logger.info(`Created ${nScheduleUpserted} and modified ${nScheduleModified} ` +
             `class sections on Course Schedule database`);
     } catch (error) {
         logger.error(error);
@@ -173,12 +169,12 @@ module.exports = async (options) => {
             });
         }
         const bulkCourseOpResult = await courseBulkOperation.execute();
-        logger.verbose(`Successfully added ${bulkCourseOpResult.nModified} schedules on Course database`);
+        logger.info(`Successfully added ${bulkCourseOpResult.nModified} schedules on Course database`);
     } catch (err) {
         logger.error(err);
         logger.error(`Failed to update Course Schedule model`);
         logger.warning(`${TAG} failed`);
-        throw Error(err);
+        return;
     }
 
     logger.info(`${TAG} finished`);
