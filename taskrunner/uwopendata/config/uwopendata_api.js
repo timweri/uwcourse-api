@@ -16,7 +16,6 @@ const filterResponseCourse = (response) => {
  *
  * @param response - response from query to API
  * @param endpoint - the endpoint queried
- * @param qs - the query string used in query
  * @returns {*} - the response with the incorrect entries removed
  */
 const filterResponse = (response, endpoint) => {
@@ -24,16 +23,15 @@ const filterResponse = (response, endpoint) => {
         '/courses': filterResponseCourse,
     };
     if (fnMap.hasOwnProperty(endpoint)) {
-        let new_response = fnMap[endpoint](response);
+        const new_response = fnMap[endpoint](response);
         logger.verbose(`Filtered out ${response.data.length - new_response.data.length} items from endpoint ${endpoint}`);
         return new_response;
-    }
-    else
+    } else
         return response;
 };
 
 const get = async (resource, qs) => {
-    let options = {
+    const options = {
         method: 'GET',
         uri: `${config.uwopendata.api_uri}${resource}.json`,
         qs: Object.assign({
@@ -54,16 +52,15 @@ const get = async (resource, qs) => {
             else {
                 logger.warn(`Retrying GET request at ${options.uri}`);
                 await timeout(delay);
-                delay *= config.uwopendata.retry_delay_multipier;
+                delay *= config.uwopendata.retry_delay_multiplier;
             }
         }
     }
-    let responseCode = response.meta.status;
+    const responseCode = response.meta.status;
     if (responseCode === 200 || responseCode === 204) {
         logger.verbose(`GET request to ${options.uri} succeeded with code ${responseCode}`);
         return response;
-    }
-    else {
+    } else {
         logger.error(`GET request to ${options.uri} failed with code ${responseCode}`);
         logger.error(JSON.stringify(response));
         throw Error(response);

@@ -1,7 +1,7 @@
 const approot = require('app-root-path');
 const winston = require('winston');
 
-let options = {
+const options = {
     file: {
         level: 'info',
         filename: `${approot}/logs/info.log`,
@@ -50,8 +50,7 @@ module.exports = (label) => {
                 logger.warn(`[${label}] ${msg}`);
             },
         };
-    }
-    else {
+    } else {
         return logger;
     }
 };

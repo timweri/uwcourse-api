@@ -28,7 +28,7 @@ const dev = {
         api_key: UWOPENDATA_API_KEY,
         retry_delay: UWOPENDATA_RETRY_DELAY,
         retries: UWOPENDATA_RETRIES,
-        retry_delay_multipier: UWOPENDATA_RETRY_DELAY_MULTIPLIER,
+        retry_delay_multiplier: UWOPENDATA_RETRY_DELAY_MULTIPLIER,
     },
 };
 
@@ -44,7 +44,7 @@ const test = {
         api_key: UWOPENDATA_API_KEY,
         retry_delay: UWOPENDATA_RETRY_DELAY,
         retries: UWOPENDATA_RETRIES,
-        retry_delay_multipier: UWOPENDATA_RETRY_DELAY_MULTIPLIER,
+        retry_delay_multiplier: UWOPENDATA_RETRY_DELAY_MULTIPLIER,
     },
 };
 

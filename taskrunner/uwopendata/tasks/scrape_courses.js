@@ -43,14 +43,14 @@ module.exports = async (options) => {
     let currentTermId;
 
     {
-        logger.verbose(`Requesting current term id`);
-        currentTermId = (await uwapi.get(`/terms/list`, {})).data.current_term.toString();
+        logger.verbose('Requesting current term id');
+        currentTermId = (await uwapi.get('/terms/list', {})).data.current_term.toString();
         logger.verbose(`Current term id: ${currentTermId}`);
     }
 
     // request for a list of all courses
     // remove the message field of the response
-    logger.verbose(`Requesting a list of all courses`);
+    logger.verbose('Requesting a list of all courses');
     listCourses = (await uwapi.get('/courses', {})).data;
     logger.verbose(`Received a list of ${listCourses.length} courses`);
 
@@ -71,7 +71,7 @@ module.exports = async (options) => {
         logger.verbose(`Saving course array to ${options.listCoursesArchivePath}`);
 
         // Drop the course title since we are not using it
-        for (let item in listCourses) {
+        for (const item in listCourses) {
             delete item.title;
         }
 
@@ -108,15 +108,15 @@ module.exports = async (options) => {
         // TODO: Refactor this for reuse in other modules
         const updateInBatch = async () => {
             while (queueParameters.length > 0) {
-                let batchResult = await Promise.all(queueParameters.slice(0, options.batchSize)
+                const batchResult = await Promise.all(queueParameters.slice(0, options.batchSize)
                     .map(e => uwapi.get(e.endpoint, e.qs)));
                 queueParameters = queueParameters.slice(options.batchSize);
                 await timeOut(options.batchDelay);
 
                 // Upsert only those not found in the archive
-                let bulkOp = Course.collection.initializeUnorderedBulkOp();
+                const bulkOp = Course.collection.initializeUnorderedBulkOp();
                 for (const item of batchResult) {
-                    let itemData = item.data;
+                    const itemData = item.data;
                     bulkOp.find({
                         course_id: itemData.course_id,
                         subject: itemData.subject,
@@ -152,14 +152,14 @@ module.exports = async (options) => {
                 }
                 const upsertResult = await bulkOp.execute();
                 logger.info(`Successfully created ${upsertResult.nUpserted} and modified ${upsertResult.nModified}` +
-                    ` courses on database`);
+                    'courses on database');
             }
         };
         try {
             await updateInBatch();
         } catch (error) {
             logger.error(error);
-            logger.error(`Error during batch processing`);
+            logger.error('Error during batch processing');
             logger.warning(`${TAG} failed`);
             return;
         }

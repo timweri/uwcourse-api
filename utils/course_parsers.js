@@ -8,7 +8,7 @@ exports.CATALOG_EXPRESSION = CATALOG_EXPRESSION;
 
 exports.parse_catalog = (text) => {
     text = text.toUpperCase();
-    let match = CATALOG_EXPRESSION.exec(text);
+    const match = CATALOG_EXPRESSION.exec(text);
     return {
         subject: match[1],
         catalog_number: match[2],

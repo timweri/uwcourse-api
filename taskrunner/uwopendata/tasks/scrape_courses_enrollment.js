@@ -20,19 +20,19 @@ module.exports = async () => {
     let currentTermId; // the id of the current term
 
     {
-        logger.verbose(`Requesting current term id`);
-        currentTermId = (await uwapi.get(`/terms/list`, {})).data.current_term.toString();
+        logger.verbose('Requesting current term id');
+        currentTermId = (await uwapi.get('/terms/list', {})).data.current_term.toString();
         logger.verbose(`Current term id: ${currentTermId}`);
     }
 
     {
-        logger.verbose(`Requesting current term enrollment for every course`);
+        logger.verbose('Requesting current term enrollment for every course');
         enrollmentList = (await uwapi.get(`/terms/${currentTermId}/enrollment`, {})).data;
-        logger.verbose(`Received class enrollment list`);
+        logger.verbose('Received class enrollment list');
     }
 
     {
-        let bulkOp = CourseSchedule.collection.initializeUnorderedBulkOp();
+        const bulkOp = CourseSchedule.collection.initializeUnorderedBulkOp();
         for (const item of enrollmentList) {
             bulkOp.find({
                 subject: item.subject,
@@ -53,7 +53,7 @@ module.exports = async () => {
             logger.info(`Updated ${bulkOpResult.nModified} class schedules on Course Schedule database`);
         } catch (err) {
             logger.error(err);
-            logger.error(`Failed to update Course Schedule model`);
+            logger.error('Failed to update Course Schedule model');
             logger.warning(`${TAG} failed`);
             return;
         }

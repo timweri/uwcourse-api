@@ -38,29 +38,4 @@ const TermSchema = new Schema({
     },
 });
 
-TermSchema.pre('save', function (next) {
-    this._update.updated_at = new Date();
-    next();
-});
-
-TermSchema.pre('findOneAndUpdate', function (next) {
-    this._update.updated_at = new Date();
-    next();
-});
-
-TermSchema.pre('update', function (next) {
-    this._update.updated_at = new Date();
-    next();
-});
-
-TermSchema.pre('updateOne', function (next) {
-    this._update.updated_at = new Date();
-    next();
-});
-
-TermSchema.pre('updateMany', function (next) {
-    this._update.updated_at = new Date();
-    next();
-});
-
 module.exports = mongoose.model('Term', TermSchema);

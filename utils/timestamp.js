@@ -27,11 +27,11 @@ exports.TIMESTAMP_EXPRESSION = TIMESTAMP_EXPRESSION;
  * Parse a timezone string to a float offset
  */
 const parseTimezone = (timezone) => {
-    if (typeof timezone == "number")
+    if (typeof timezone == 'number')
         return timezone;
     if (timezone === 'Z') return 0;
     else {
-        let match = /^([-+])(\d{2}):(\d{2})$/.exec(timezone);
+        const match = /^([-+])(\d{2}):(\d{2})$/.exec(timezone);
         let result = parseFloat(match[2]);
         result += parseInt(match[3], 10) / 60;
         if (match[1] === '-') result *= -1;
@@ -55,19 +55,19 @@ exports.validateTimestamp = (timestamp) => TIMESTAMP_EXPRESSION.test(timestamp);
 const dateToString = (date) => {
     date.setTime(date.getTime() + TIMEZONE_OFFSET * 60 * 60 * 1000);
     return `${date.getUTCFullYear()}-` +
-        `${(date.getUTCMonth()+1).toString().padStart(2,'0')}-` +
-        `${date.getUTCDate().toString().padStart(2,'0')}` +
-        `T${date.getUTCHours().toString().padStart(2,'0')}:` +
-        `${date.getUTCMinutes().toString().padStart(2,'0')}:` +
-        `${date.getUTCSeconds().toString().padStart(2,'0')}` +
+        `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-` +
+        `${date.getUTCDate().toString().padStart(2, '0')}` +
+        `T${date.getUTCHours().toString().padStart(2, '0')}:` +
+        `${date.getUTCMinutes().toString().padStart(2, '0')}:` +
+        `${date.getUTCSeconds().toString().padStart(2, '0')}` +
         (TIMEZONE_OFFSET === 0 ? 'Z' :
             `${TIMEZONE_OFFSET < 0 ? '-' : '+'}` +
-            `${Math.floor(Math.abs(TIMEZONE_OFFSET)).toString().padStart(2,'0')}:` +
-            `${Math.floor(((TIMEZONE_OFFSET % 1)* 60)).toString().padStart(2, '0')}`);
+            `${Math.floor(Math.abs(TIMEZONE_OFFSET)).toString().padStart(2, '0')}:` +
+            `${Math.floor(((TIMEZONE_OFFSET % 1) * 60)).toString().padStart(2, '0')}`);
 };
 
 exports.generateTimestampString = () => {
-    let date = new Date();
+    const date = new Date();
     return dateToString(date);
 };
 
@@ -75,7 +75,7 @@ exports.generateTimestampString = () => {
  * Parse a timestamp of ISO 8601
  */
 const parseTimestamp = (timestamp) => {
-    let match = TIMESTAMP_EXPRESSION.exec(timestamp);
+    const match = TIMESTAMP_EXPRESSION.exec(timestamp);
     return {
         year: Number(match[1]),
         month: Number(match[2]),
