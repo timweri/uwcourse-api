@@ -23,12 +23,23 @@ mongoose.connection.on('error', () => {
 mongoose.connection.once('open', async () => {
     logger.info('Successfully connected to database uwcourseapi');
 
+    await uwopendataTasks.scrape_terms();
     await uwopendataTasks.scrape_courses();
     await uwopendataTasks.scrape_class_schedule();
 
-    // Scrape courses on the first day of every 2 month
-    cron.schedule('0 0 1 */2 *', async () => {
+    // Scrape term list on the 15th day of every month
+    cron.schedule('0 0 15 * *', async () => {
+        await uwopendataTasks.scrape_terms();
+    });
+
+    // Scrape courses on the first day of every 1 month
+    cron.schedule('0 0 1 * *', async () => {
         await uwopendataTasks.scrape_courses();
+    });
+
+    // Scrape class schedules on the first day of every month
+    cron.schedule('0 1 1 * *', async () => {
+        await uwopendataTasks.scrape_class_schedule();
     });
 
     // Scrape enrollment every hour

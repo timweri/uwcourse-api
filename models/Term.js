@@ -16,7 +16,7 @@ const TermSchema = new Schema({
         type: Number,
         required: true,
     },
-    term_season: {
+    season: {
         type: String,
         required: true,
         enum: {
