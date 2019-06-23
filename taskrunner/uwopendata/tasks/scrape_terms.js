@@ -4,17 +4,7 @@ const TAG = path.basename(__filename);
 const logger = require(`${approot}/config/winston`)(TAG);
 const Term = require(`${approot}/models/Term`);
 const uwapi = require('../config/uwopendata_api');
-
-const fail = (err, extraMessages) => {
-    if (err) logger.error(err.stack);
-    if (extraMessages) {
-        for (const message of extraMessages) {
-            logger.error(message);
-        }
-    }
-    logger.error(`${TAG} failed`);
-    return 1;
-};
+const fail = require('./utils/fail_task')(logger, TAG);
 
 /**
  * Scrape and parse term info to update Term model

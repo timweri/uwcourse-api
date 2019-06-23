@@ -4,6 +4,7 @@ const TAG = path.basename(__filename);
 const logger = require(`${approot}/config/winston`)(TAG);
 const CourseSchedule = require(`${approot}/models/CourseSchedule`);
 const uwapi = require('../config/uwopendata_api');
+const fail = require('./utils/fail_task')(logger, TAG);
 
 /**
  * Update our course schedule with new enrollment changes from UW API
@@ -11,7 +12,7 @@ const uwapi = require('../config/uwopendata_api');
  * First, request the enrollment for every section of every course for the current term.
  * Update the Course Schedule database.
  *
- * @returns {Promise<void>}
+ * @returns {Promise<int>}
  */
 module.exports = async () => {
     logger.info(`Starting ${TAG}`);
@@ -52,12 +53,10 @@ module.exports = async () => {
             const bulkOpResult = await bulkOp.execute();
             logger.info(`Updated ${bulkOpResult.nModified} class schedules on Course Schedule database`);
         } catch (err) {
-            logger.error(err);
-            logger.error('Failed to update Course Schedule model');
-            logger.warning(`${TAG} failed`);
-            return;
+            return fail(err);
         }
     }
 
     logger.info(`${TAG} finished`);
+    return 0;
 };

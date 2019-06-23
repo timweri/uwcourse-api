@@ -7,6 +7,7 @@ const Course = require(`${approot}/models/Course`);
 const CourseSchedule = require(`${approot}/models/CourseSchedule`);
 const uwapi = require('../config/uwopendata_api');
 const timeout = require(`${approot}/utils/delay`);
+const fail = require('./utils/fail_task')(logger, TAG);
 
 /**
  * Update our course schedule with new changes from UW API
@@ -21,7 +22,7 @@ const timeout = require(`${approot}/utils/delay`);
  * Then, update the schedule of the Course model with this this _id.
  *
  * @param options
- * @returns {Promise<void>}
+ * @returns {Promise<int>}
  */
 module.exports = async (options) => {
     logger.info(`Starting ${TAG}`);
@@ -42,16 +43,16 @@ module.exports = async (options) => {
         listCourses = JSON.parse(await fs.promises.readFile(options.listCoursesArchivePath, options.archiveEncoding));
     } catch (err) {
         if (err.code === 'ENOENT') {
-            logger.error(`${options.listCoursesArchivePath} does not exist`);
-            logger.warning(`${TAG} failed`);
-            return;
-        } else throw Error(err);
+            return fail(err, [`${options.listCoursesArchivePath} does not exist`]);
+        } else return fail(err);
     }
 
-    {
+    try {
         logger.verbose('Requesting current term id');
         currentTermId = (await uwapi.get('/terms/list', {})).data.current_term.toString();
         logger.verbose(`Current term id: ${currentTermId}`);
+    } catch (err) {
+        return fail(err);
     }
 
     let queue = []; // a queue of HTTP request, each item is for one course
@@ -120,9 +121,7 @@ module.exports = async (options) => {
                 nScheduleModified += bulkOpResult.nModified;
                 nScheduleUpserted += bulkOpResult.nUpserted;
             } catch (err) {
-                logger.error(err);
-                logger.error('Failed to update Course Schedule database');
-                throw err;
+                return fail(err, ['Failed to update Course Schedule database']);
             }
         }
     };
@@ -132,11 +131,8 @@ module.exports = async (options) => {
         logger.verbose(`Processed schedules of ${nSuccessfulScheduleQuery}/${listCourses.length} courses`);
         logger.info(`Created ${nScheduleUpserted} and modified ${nScheduleModified} ` +
             'class sections on Course Schedule database');
-    } catch (error) {
-        logger.error(error);
-        logger.error(`Failed to process schedules of ${listCourses.length} courses`);
-        logger.warning(`${TAG} failed`);
-        return;
+    } catch (err) {
+        return fail(err, [`Failed to process schedules of ${listCourses.length} courses`]);
     }
 
     try {
@@ -171,11 +167,9 @@ module.exports = async (options) => {
         const bulkCourseOpResult = await courseBulkOperation.execute();
         logger.info(`Successfully added ${bulkCourseOpResult.nModified} schedules on Course database`);
     } catch (err) {
-        logger.error(err);
-        logger.error('Failed to update Course Schedule model');
-        logger.warning(`${TAG} failed`);
-        return;
+        return fail(err, ['Failed to update Course Schedule model']);
     }
 
     logger.info(`${TAG} finished`);
+    return 0;
 };
