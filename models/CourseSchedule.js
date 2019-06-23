@@ -62,9 +62,9 @@ const CourseScheduleSchema = new Schema({
         index: true,
     },
     term_id: {
-        type: String,
-        index: true,
+        type: Schema.Types.ObjectId,
         required: true,
+        ref: 'Term',
     },
     class_number: {
         type: String,

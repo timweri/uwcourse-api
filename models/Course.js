@@ -70,8 +70,9 @@ const CourseSchema = new Schema({
     crosslistings: String,
     terms_offered: [String],
     term_id: {
-        type: String,
+        type: Schema.Types.ObjectId,
         required: true,
+        ref: 'Term',
     },
     offerings: OfferingSchema,
     needs_department_consent: Boolean,
@@ -88,11 +89,6 @@ const CourseSchema = new Schema({
         immutable: true,
         default: new Date(),
     },
-});
-
-CourseSchema.pre('save', function (next) {
-    this._update.updated_at = new Date();
-    next();
 });
 
 module.exports = mongoose.model('Course', CourseSchema);

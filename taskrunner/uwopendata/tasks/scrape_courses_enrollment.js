@@ -5,6 +5,7 @@ const logger = require(`${approot}/config/winston`)(TAG);
 const CourseSchedule = require(`${approot}/models/CourseSchedule`);
 const uwapi = require('../config/uwopendata_api');
 const fail = require('./utils/fail_task')(logger, TAG);
+const getCurrentTermId = require('./utils/current_term_id')(logger, TAG);
 
 /**
  * Update our course schedule with new enrollment changes from UW API
@@ -20,15 +21,15 @@ module.exports = async () => {
     let enrollmentList;
     let currentTermId; // the id of the current term
 
-    {
-        logger.verbose('Requesting current term id');
-        currentTermId = (await uwapi.get('/terms/list', {})).data.current_term.toString();
-        logger.verbose(`Current term id: ${currentTermId}`);
+    try {
+        currentTermId = await getCurrentTermId();
+    } catch (err) {
+        return fail(err);
     }
 
     {
         logger.verbose('Requesting current term enrollment for every course');
-        enrollmentList = (await uwapi.get(`/terms/${currentTermId}/enrollment`, {})).data;
+        enrollmentList = (await uwapi.get(`/terms/${currentTermId.uw_id}/enrollment`, {})).data;
         logger.verbose('Received class enrollment list');
     }
 
@@ -39,7 +40,7 @@ module.exports = async () => {
                 subject: item.subject,
                 catalog_number: item.catalog_number,
                 class_number: item.class_number.toString(),
-                term_id: currentTermId,
+                term_id: currentTermId.internal_id,
             }).updateOne({
                 enrollment_capacity: item.enrollment_capacity,
                 enrollment_total: item.enrollment_total,

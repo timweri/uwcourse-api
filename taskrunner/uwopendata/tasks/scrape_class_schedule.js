@@ -8,6 +8,7 @@ const CourseSchedule = require(`${approot}/models/CourseSchedule`);
 const uwapi = require('../config/uwopendata_api');
 const timeout = require(`${approot}/utils/delay`);
 const fail = require('./utils/fail_task')(logger, TAG);
+const getCurrentTermId = require('./utils/current_term_id')(logger, TAG);
 
 /**
  * Update our course schedule with new changes from UW API
@@ -48,9 +49,7 @@ module.exports = async (options) => {
     }
 
     try {
-        logger.verbose('Requesting current term id');
-        currentTermId = (await uwapi.get('/terms/list', {})).data.current_term.toString();
-        logger.verbose(`Current term id: ${currentTermId}`);
+        currentTermId = await getCurrentTermId();
     } catch (err) {
         return fail(err);
     }
@@ -91,7 +90,7 @@ module.exports = async (options) => {
                     bulkCourseScheduleOp.find({
                         subject: section.subject,
                         catalog_number: section.catalog_number,
-                        term_id: currentTermId,
+                        term_id: currentTermId.internal_id,
                         class_number: section.class_number,
                     }).upsert().updateOne({
                         $set: {
@@ -109,7 +108,7 @@ module.exports = async (options) => {
                         $setOnInsert: {
                             subject: section.subject,
                             catalog_number: section.catalog_number,
-                            term_id: currentTermId,
+                            term_id: currentTermId.internal_id,
                             class_number: section.class_number,
                         },
                     });
@@ -142,7 +141,7 @@ module.exports = async (options) => {
                 $and: [{
                     subject: item.subject,
                     catalog_number: item.catalog_number,
-                    term_id: currentTermId,
+                    term_id: currentTermId.internal_id,
                     class_number: item.class_number,
                 }],
             });
@@ -155,7 +154,7 @@ module.exports = async (options) => {
             courseBulkOperation.find({
                 subject: item.subject,
                 catalog_number: item.catalog_number,
-                term_id: currentTermId,
+                term_id: currentTermId.internal_id,
                 schedule: {$ne: item._id},
             }).updateOne({
                 $addToSet: {

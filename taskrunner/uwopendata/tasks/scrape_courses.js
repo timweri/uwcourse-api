@@ -7,6 +7,7 @@ const Course = require(`${approot}/models/Course`);
 const uwapi = require('../config/uwopendata_api');
 const timeOut = require(`${approot}/utils/delay`);
 const fail = require('./utils/fail_task')(logger, TAG);
+const getCurrentTermId = require('./utils/current_term_id')(logger, TAG);
 
 /**
  * Update our course details with new changes from UW OpenData API
@@ -44,9 +45,7 @@ module.exports = async (options) => {
     let currentTermId;
 
     try {
-        logger.verbose('Requesting current term id');
-        currentTermId = (await uwapi.get('/terms/list', {})).data.current_term.toString();
-        logger.verbose(`Current term id: ${currentTermId}`);
+        currentTermId = await getCurrentTermId();
     } catch (err) {
         return fail(err);
     }
@@ -113,7 +112,7 @@ module.exports = async (options) => {
                     course_id: itemData.course_id,
                     subject: itemData.subject,
                     catalog_number: itemData.catalog_number,
-                    term_id: currentTermId,
+                    term_id: currentTermId.internal_id,
                 }).upsert().updateOne({
                     $set: {
                         title: itemData.title,
@@ -137,14 +136,14 @@ module.exports = async (options) => {
                         created_at: new Date(),
                         course_id: itemData.course_id,
                         subject: itemData.subject,
-                        term_id: currentTermId,
+                        term_id: currentTermId.internal_id,
                         catalog_number: itemData.catalog_number,
                     },
                 });
             }
             const upsertResult = await bulkOp.execute();
             logger.info(`Successfully created ${upsertResult.nUpserted} and modified ${upsertResult.nModified}` +
-                'courses on database');
+                ' courses on database');
         }
     };
     try {
