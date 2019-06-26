@@ -23,10 +23,6 @@ const TermSchema = new Schema({
             values: ['Spring', 'Fall', 'Winter'],
         },
     },
-    courses: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Term',
-    }],
     updated_at: {
         type: Date,
         default: new Date(),
