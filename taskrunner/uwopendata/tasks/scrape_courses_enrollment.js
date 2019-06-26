@@ -42,11 +42,13 @@ module.exports = async () => {
                 class_number: item.class_number.toString(),
                 term_id: currentTermId.internal_id,
             }).updateOne({
-                enrollment_capacity: item.enrollment_capacity,
-                enrollment_total: item.enrollment_total,
-                waiting_capacity: item.waiting_capacity,
-                waiting_total: item.waiting_total,
-                updated_at: new Date(item.last_updated),
+                $set: {
+                    enrollment_capacity: item.enrollment_capacity,
+                    enrollment_total: item.enrollment_total,
+                    waiting_capacity: item.waiting_capacity,
+                    waiting_total: item.waiting_total,
+                    updated_at: new Date(item.last_updated),
+                },
             });
         }
 
