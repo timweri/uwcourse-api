@@ -74,7 +74,7 @@ module.exports = async (options) => {
             await timeout(options.batchDelay);
 
             nSuccessfulScheduleQuery += batchResult.length;
-            const bulkCourseScheduleOp = CourseSchedule.collection.initializeUnorderedBulkOp();
+            const bulkCourseScheduleOps = [];
 
             // For each course
             for (const courseItem of batchResult) {
@@ -87,36 +87,42 @@ module.exports = async (options) => {
                         catalog_number: section.catalog_number,
                         class_number: section.class_number,
                     });
-                    bulkCourseScheduleOp.find({
-                        subject: section.subject,
-                        catalog_number: section.catalog_number,
-                        term_id: currentTermId.internal_id,
-                        class_number: section.class_number,
-                    }).upsert().updateOne({
-                        $set: {
-                            campus: section.campus,
-                            note: section.note,
-                            enrollment_capacity: section.enrollment_capacity,
-                            enrollment_total: section.enrollment_total,
-                            waiting_capacity: section.waiting_capacity,
-                            waiting_total: section.waiting_total,
-                            reserves: section.reserves,
-                            classes: section.classes,
-                            section: section.section,
-                            updated_at: new Date(section.last_updated),
-                        },
-                        $setOnInsert: {
-                            subject: section.subject,
-                            catalog_number: section.catalog_number,
-                            term_id: currentTermId.internal_id,
-                            class_number: section.class_number,
+                    bulkCourseScheduleOps.push({
+                        updateOne: {
+                            filter: {
+                                subject: section.subject,
+                                catalog_number: section.catalog_number,
+                                term_id: currentTermId.internal_id,
+                                class_number: section.class_number,
+                            },
+                            update: {
+                                $set: {
+                                    campus: section.campus,
+                                    note: section.note,
+                                    enrollment_capacity: section.enrollment_capacity,
+                                    enrollment_total: section.enrollment_total,
+                                    waiting_capacity: section.waiting_capacity,
+                                    waiting_total: section.waiting_total,
+                                    reserves: section.reserves,
+                                    classes: section.classes,
+                                    section: section.section,
+                                    updated_at: new Date(section.last_updated),
+                                },
+                                $setOnInsert: {
+                                    subject: section.subject,
+                                    catalog_number: section.catalog_number,
+                                    term_id: currentTermId.internal_id,
+                                    class_number: section.class_number,
+                                },
+                            },
+                            upsert: true,
                         },
                     });
                 }
             }
 
             try {
-                const bulkOpResult = await bulkCourseScheduleOp.execute();
+                const bulkOpResult = await CourseSchedule.collection.bulkWrite(bulkCourseScheduleOps, {ordered: false});
                 nScheduleModified += bulkOpResult.nModified;
                 nScheduleUpserted += bulkOpResult.nUpserted;
             } catch (err) {
@@ -149,21 +155,27 @@ module.exports = async (options) => {
         bulkOperationScheduleItems = null;
         const scheduleFindResult = await CourseSchedule.find({$or: scheduleFindConditions}, ['_id', 'subject', 'catalog_number']);
         scheduleFindConditions = null;
-        const courseBulkOperation = Course.collection.initializeUnorderedBulkOp();
+        const bulkCourseOps = [];
         for (const item of scheduleFindResult) {
-            courseBulkOperation.find({
-                subject: item.subject,
-                catalog_number: item.catalog_number,
-                term_id: currentTermId.internal_id,
-                schedule: {$ne: item._id},
-            }).updateOne({
-                $addToSet: {
-                    schedule: item._id,
+            bulkCourseOps.push({
+                updateOne: {
+                    filter: {
+                        subject: item.subject,
+                        catalog_number: item.catalog_number,
+                        term_id: currentTermId.internal_id,
+                        schedule: {$ne: item._id},
+                    },
+                    update: {
+                        $addToSet: {
+                            schedule: item._id,
+                        },
+                        $set: {updated_at: new Date()},
+                    },
+                    upsert: false,
                 },
-                $set: {updated_at: new Date()},
             });
         }
-        const bulkCourseOpResult = await courseBulkOperation.execute();
+        const bulkCourseOpResult = await Course.collection.bulkWrite(bulkCourseOps, {ordered: false});
         logger.info(`Successfully added ${bulkCourseOpResult.nModified} schedules on Course database`);
     } catch (err) {
         return fail(err, ['Failed to update Course Schedule model']);

@@ -34,26 +34,32 @@ module.exports = async () => {
     }
 
     {
-        const bulkOp = CourseSchedule.collection.initializeUnorderedBulkOp();
+        const bulkOps = [];
         for (const item of enrollmentList) {
-            bulkOp.find({
-                subject: item.subject,
-                catalog_number: item.catalog_number,
-                class_number: item.class_number.toString(),
-                term_id: currentTermId.internal_id,
-            }).updateOne({
-                $set: {
-                    enrollment_capacity: item.enrollment_capacity,
-                    enrollment_total: item.enrollment_total,
-                    waiting_capacity: item.waiting_capacity,
-                    waiting_total: item.waiting_total,
-                    updated_at: new Date(item.last_updated),
+            bulkOps.push({
+                updateOne: {
+                    filter: {
+                        subject: item.subject,
+                        catalog_number: item.catalog_number,
+                        class_number: item.class_number.toString(),
+                        term_id: currentTermId.internal_id,
+                    },
+                    update: {
+                        $set: {
+                            enrollment_capacity: item.enrollment_capacity,
+                            enrollment_total: item.enrollment_total,
+                            waiting_capacity: item.waiting_capacity,
+                            waiting_total: item.waiting_total,
+                            updated_at: new Date(item.last_updated),
+                        },
+                    },
+                    upsert: false,
                 },
             });
         }
 
         try {
-            const bulkOpResult = await bulkOp.execute();
+            const bulkOpResult = await CourseSchedule.collection.bulkWrite(bulkOps, {ordered: false});
             logger.info(`Updated ${bulkOpResult.nModified} class schedules on Course Schedule database`);
         } catch (err) {
             return fail(err);

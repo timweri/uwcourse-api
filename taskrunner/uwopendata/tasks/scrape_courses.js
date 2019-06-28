@@ -105,43 +105,49 @@ module.exports = async (options) => {
             await timeOut(options.batchDelay);
 
             // Upsert only those not found in the archive
-            const bulkOp = Course.collection.initializeUnorderedBulkOp();
+            const bulkOps = [];
             for (const item of batchResult) {
                 const itemData = item.data;
-                bulkOp.find({
-                    course_id: itemData.course_id,
-                    subject: itemData.subject,
-                    catalog_number: itemData.catalog_number,
-                    term_id: currentTermId.internal_id,
-                }).upsert().updateOne({
-                    $set: {
-                        title: itemData.title,
-                        url: itemData.url,
-                        units: itemData.units,
-                        academic_level: itemData.academic_level,
-                        description: itemData.description,
-                        instructions: itemData.instructions,
-                        prerequisites: itemData.prerequisites,
-                        corequisites: itemData.corequisites,
-                        crosslistings: itemData.crosslistings,
-                        terms_offered: itemData.terms_offered,
-                        offerings: itemData.offerings,
-                        needs_department_consent: itemData.needs_department_consent,
-                        needs_instructor_consent: itemData.needs_instructor_consent,
-                        notes: itemData.notes,
-                        extra: itemData.extra,
-                        updated_at: new Date(),
-                    },
-                    $setOnInsert: {
-                        created_at: new Date(),
-                        course_id: itemData.course_id,
-                        subject: itemData.subject,
-                        term_id: currentTermId.internal_id,
-                        catalog_number: itemData.catalog_number,
+                bulkOps.push({
+                    updateOne: {
+                        filter: {
+                            course_id: itemData.course_id,
+                            subject: itemData.subject,
+                            catalog_number: itemData.catalog_number,
+                            term_id: currentTermId.internal_id,
+                        },
+                        update: {
+                            $set: {
+                                title: itemData.title,
+                                url: itemData.url,
+                                units: itemData.units,
+                                academic_level: itemData.academic_level,
+                                description: itemData.description,
+                                instructions: itemData.instructions,
+                                prerequisites: itemData.prerequisites,
+                                corequisites: itemData.corequisites,
+                                crosslistings: itemData.crosslistings,
+                                terms_offered: itemData.terms_offered,
+                                offerings: itemData.offerings,
+                                needs_department_consent: itemData.needs_department_consent,
+                                needs_instructor_consent: itemData.needs_instructor_consent,
+                                notes: itemData.notes,
+                                extra: itemData.extra,
+                                updated_at: new Date(),
+                            },
+                            $setOnInsert: {
+                                created_at: new Date(),
+                                course_id: itemData.course_id,
+                                subject: itemData.subject,
+                                term_id: currentTermId.internal_id,
+                                catalog_number: itemData.catalog_number,
+                            },
+                        },
+                        upsert: true,
                     },
                 });
             }
-            const upsertResult = await bulkOp.execute();
+            const upsertResult = await Course.collection.bulkWrite(bulkOps, {ordered: false});
             logger.info(`Successfully created ${upsertResult.nUpserted} and modified ${upsertResult.nModified}` +
                 ' courses on database');
         }
