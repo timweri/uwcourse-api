@@ -1,16 +1,10 @@
 const approot = require('app-root-path');
 const mongoose = require('mongoose');
+const emailValidator = require(`${approot}/utils/users/validators/email_validator`);
 const Schema = mongoose.Schema;
 
-const facultyProgramValidator = require(`${approot}/utils/database/validators/validate_faculty_program`);
 
-/**
- * Error Codes
- */
-const error_codes = {
-    OK: 0,
-    DUPLICATE_EMAIL: 1,
-};
+const facultyProgramValidator = require(`${approot}/utils/database/validators/validate_faculty_program`);
 
 /**
  * User Schema
@@ -19,13 +13,24 @@ const error_codes = {
 const UserSchema = new Schema({
     name: {
         type: String,
-        match: [/^[a-zA-Z -']+$/, 'Special characters and numbers not allowed'],
+        match: [
+            /^[a-zA-Z -']+$/,
+            'Special characters and numbers not allowed',
+            'invalid',
+        ],
     },
     email: {
         type: String,
-        required: true,
+        required: [true, 'Email is required'],
         index: true,
         unique: true,
+        validate: [
+            async (value) => {
+                return emailValidator.test(value);
+            },
+            'Invalid email',
+            'invalid',
+        ],
     },
     avatar_url: {
         type: String,
@@ -33,21 +38,25 @@ const UserSchema = new Schema({
     },
     password: {
         type: String,
-        required: true,
+        required: [true, 'Password is missing'],
     },
     faculty: {
         type: String,
         enum: {
             values: facultyProgramValidator.POSSIBLE_FACULTY,
+            message: 'Invalid faculty',
+            type: 'invalid',
         },
     },
     program: {
         type: String,
-        validate: {
-            validator: (v) => {
-                return facultyProgramValidator.VALID_PROGRAMS[this.faculty].includes(v);
+        validate: [
+            (value) => {
+                return facultyProgramValidator.VALID_PROGRAMS[this.faculty].includes(value);
             },
-        },
+            'Invalid',
+            'invalid',
+        ],
     },
     favourite_courses: [{type: Schema.Types.ObjectId, ref: 'Course'}],
     terms: [{type: Schema.Types.ObjectId, ref: 'Term'}],
@@ -61,34 +70,13 @@ const UserSchema = new Schema({
         immutable: true,
         default: new Date(),
     },
-},
-{
-    defaultBulkMatchFields: ['email'],
-});
-
-// Check duplicate email
-UserSchema.post('save', function (error, doc, next) {
-    if (error.name === 'MongoError' && error.code === 11000) {
-        const newError = new Error('Email already exists');
-        newError.code = error_codes.DUPLICATE_EMAIL;
-        next(newError);
-    } else {
-        next();
-    }
 });
 
 // Update updated_at timestamp
 UserSchema.pre('save', function (next) {
-    if (this.isModified()) {
+    if (!this.isNew) {
         this.updated_at = new Date();
-    } else if (this.isNew) {
-        this.updated_at = this.created_at;
     }
-    next();
-});
-
-UserSchema.pre('findOneAndUpdate', function (next) {
-    this._update.updated_at = new Date();
     next();
 });
 
@@ -102,11 +90,16 @@ UserSchema.pre('updateOne', function (next) {
     next();
 });
 
-UserSchema.pre('updateMany', function (next) {
-    this._update.updated_at = new Date();
-    next();
-});
+const User = mongoose.model('User', UserSchema);
 
-const model = mongoose.model('User', UserSchema);
-model.error_codes = error_codes;
-module.exports = model;
+// Check duplicate email
+User.schema.path('email').validate(async (value) => {
+    try {
+        const user = await User.findOne({email: value});
+        return (user === null);
+    } catch (err) {
+        throw err;
+    }
+}, 'Email already exists', 'exists');
+
+module.exports = User;
