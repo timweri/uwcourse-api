@@ -46,9 +46,9 @@ const get = async (resource, qs) => {
             logger.verbose(`Sending GET request to ${options.uri}`);
             response = filterResponse(await rp(options), resource, qs);
             if (response != null) break;
-        } catch (error) {
-            logger.error(`GET request failed at ${options.uri} with ${error}`);
-            if (i >= config.uwopendata.retries - 1) throw error;
+        } catch (err) {
+            logger.error(`GET request failed at ${options.uri} with ${err.stack}`);
+            if (i >= config.uwopendata.retries - 1) throw err;
             else {
                 logger.warn(`Retrying GET request at ${options.uri}`);
                 await timeout(delay);
