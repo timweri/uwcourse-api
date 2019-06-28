@@ -9,7 +9,7 @@
     "express": "^4.16.4",
     "jsonwebtoken": "^8.5.0",
     "mongodb": "^3.1.13",
-    "mongoose": "^5.4.15",
+    "mongoose": "^5.6.1",
     "node-gyp": "^5.0.0",
     "require-dir": "^1.2.0",
     "require.all": "^2.0.4",
