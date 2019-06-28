@@ -4,9 +4,7 @@ const path = require('path');
 const TAG = path.basename(__filename);
 
 const mongoose = require('mongoose');
-const bulkOp = require('mongoose-bulkop');
 const immutable = require('mongoose-immutable-plugin');
-mongoose.plugin(bulkOp);
 mongoose.plugin(immutable);
 
 const requireDir = require('requiredir');
