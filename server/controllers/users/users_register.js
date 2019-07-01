@@ -10,6 +10,8 @@ const config = require(`${approot}/config/config`);
 const passwordValidator = require(`${approot}/utils/users/validators/password_validator`);
 
 module.exports = async (req, res, next) => {
+    logger.setId(req.id);
+
     const result = {};
 
     if (!req.body.hasOwnProperty('email') || !req.body.hasOwnProperty('password')) {

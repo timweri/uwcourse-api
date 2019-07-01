@@ -1,6 +1,8 @@
 const logger = require('./config/winston')(__filename.slice(__dirname.length + 1, -3));
 
 const express = require('express');
+const addRequestId = require('express-request-id')();
+
 const app = express();
 const router = express.Router();
 const routes = require('./routes/index.js');
@@ -8,6 +10,8 @@ const routes = require('./routes/index.js');
 const config = require('./config/config');
 
 const bodyParser = require('body-parser');
+
+app.use(addRequestId);
 
 app.use(bodyParser.urlencoded({
     extended: true,

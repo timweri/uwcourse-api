@@ -4,6 +4,8 @@ const TAG = path.basename(__filename);
 const logger = require(`${approot}/config/winston`)(TAG);
 
 module.exports = async (err, req, res, next) => {
+    logger.setId(req.id);
+
     const result = {};
 
     if (err.name === 'ValidationError') {

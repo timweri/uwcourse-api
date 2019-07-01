@@ -6,6 +6,8 @@ const jwt = require('jsonwebtoken');
 const config = require(`${approot}/config/config`);
 
 module.exports = async (req, res, next) => {
+    logger.setId(req.id);
+
     const token = req.header(config.app.auth_header);
     if (!token) {
         const newErr = new Error();
@@ -32,7 +34,7 @@ module.exports = async (req, res, next) => {
     }
 
     req.token = {
-        token: token,
+        raw: token,
         email: decodedToken.email,
     };
     next();

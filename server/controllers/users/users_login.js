@@ -8,6 +8,8 @@ const jwt = require('jsonwebtoken');
 const config = require(`${approot}/config/config`);
 
 module.exports = async (req, res, next) => {
+    logger.setId(req.id);
+
     const result = {};
 
     if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('email') || !req.body.hasOwnProperty('password')) {
