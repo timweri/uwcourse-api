@@ -16,11 +16,19 @@ module.exports = (router) => {
     router.post('/users', user_controller.users_register);
     router.post('/users/tokens', user_controller.users_login);
 
+
     router.use(
         [
             '/users/self',
         ],
         user_controller.users_validate_token
+    );
+
+    router.get(
+        [
+            '/users/self',
+        ],
+        user_controller.users_fetch_token_user
     );
 
     router.get('/users/self', user_controller.users_get_self);
