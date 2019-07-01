@@ -23,5 +23,7 @@ module.exports = (router) => {
         user_controller.users_validate_token
     );
 
+    router.get('/users/self', user_controller.users_get_self);
+
     router.use(user_controller.users_error);
 };

@@ -28,6 +28,9 @@ module.exports = async (err, req, res, next) => {
             case 401:
                 result.error = 'Unauthorized';
                 break;
+            case 404:
+                result.error = 'Not found';
+                break;
             case 500:
                 logger.error(err.stack);
                 result.error = 'Server error';
