@@ -1,7 +1,7 @@
 const approot = require('app-root-path');
 const winston = require('winston');
 
-let options = {
+const options = {
     file: {
         level: 'info',
         filename: `${approot}/logs/info.log`,
@@ -32,26 +32,34 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 module.exports = (label) => {
+    let uuid;
     if (label) {
         return {
+            setId: (id) => {
+                uuid = id;
+            },
             error: (msg) => {
-                logger.error(`[${label}] ${msg}`);
+                if (uuid) logger.error(`[${label}] ${uuid}: ${msg}`);
+                else logger.error(`[${label}] ${msg}`);
             },
             info: (msg) => {
-                logger.info(`[${label}] ${msg}`);
+                if (uuid) logger.info(`[${label}] ${uuid}: ${msg}`);
+                else logger.info(`[${label}] ${msg}`);
             },
             debug: (msg) => {
-                logger.debug(`[${label}] ${msg}`);
+                if (uuid) logger.debug(`[${label}] ${uuid}: ${msg}`);
+                else logger.debug(`[${label}] ${msg}`);
             },
             verbose: (msg) => {
-                logger.verbose(`[${label}] ${msg}`);
+                if (uuid) logger.verbose(`[${label}] ${uuid}: ${msg}`);
+                else logger.verbose(`[${label}] ${msg}`);
             },
             warn: (msg) => {
-                logger.warn(`[${label}] ${msg}`);
+                if (uuid) logger.warn(`[${label}] ${uuid}: ${msg}`);
+                else logger.warn(`[${label}] ${msg}`);
             },
         };
-    }
-    else {
+    } else {
         return logger;
     }
 };
