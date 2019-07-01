@@ -22,7 +22,7 @@ module.exports = async (req, res, next) => {
 
     let user;
     try {
-        user = await User.findOne({email}, 'password').exec();
+        user = await User.findOne({email}, ['password', 'token_key']);
     } catch (err) {
         err.status = 500;
         next(err);
@@ -44,7 +44,7 @@ module.exports = async (req, res, next) => {
             await user.save();
             logger.info(`${email} logged in successfully`);
             result.status = 200;
-            result.result = jwt.sign({email: email}, config.secret, {expiresIn: '3h'});
+            result.result = jwt.sign({email, token_key: user.token_key}, config.secret, {expiresIn: '3h'});
         } else {
             logger.info(`Failed to authenticate ${email}: Wrong password`);
             result.status = 401;

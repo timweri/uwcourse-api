@@ -2,7 +2,7 @@ const approot = require('app-root-path');
 const mongoose = require('mongoose');
 const emailValidator = require(`${approot}/utils/users/validators/email_validator`);
 const Schema = mongoose.Schema;
-
+const config = require(`${approot}/config/config`);
 
 const facultyProgramValidator = require(`${approot}/utils/database/validators/validate_faculty_program`);
 
@@ -40,12 +40,17 @@ const UserSchema = new Schema({
         type: String,
         required: [true, 'Password is missing'],
     },
+    token_key: {
+        type: String,
+        required: [true, 'Token key is missing'],
+        minlength: [config.app.token_key_length, `Token key length must be ${config.app.token_key_length}`],
+        maxlength: [config.app.token_key_length, `Token key length must be ${config.app.token_key_length}`],
+    },
     faculty: {
         type: String,
         enum: {
             values: facultyProgramValidator.POSSIBLE_FACULTY,
             message: 'Invalid faculty',
-            type: 'invalid',
         },
     },
     program: {

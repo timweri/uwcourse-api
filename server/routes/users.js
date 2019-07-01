@@ -16,7 +16,6 @@ module.exports = (router) => {
     router.post('/users', user_controller.users_register);
     router.post('/users/tokens', user_controller.users_login);
 
-
     router.use(
         [
             '/users/self',

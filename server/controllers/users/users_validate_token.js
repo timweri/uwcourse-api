@@ -3,6 +3,7 @@ const path = require('path');
 const TAG = path.basename(__filename);
 const logger = require(`${approot}/config/winston`)(TAG);
 const jwt = require('jsonwebtoken');
+const User = require(`${approot}/models/User`);
 const config = require(`${approot}/config/config`);
 
 module.exports = async (req, res, next) => {
@@ -22,7 +23,8 @@ module.exports = async (req, res, next) => {
         decodedToken = jwt.verify(token, config.secret);
         logger.info(`Valid token: ${token}`);
     } catch (err) {
-        if (err.name === 'JsonWebTokenError' && err.message === 'invalid signature') {
+        if ((err.name === 'JsonWebTokenError' && err.message === 'invalid signature') ||
+            (err.name === 'TokenExpiredError' && err.message === 'jwt expired')) {
             const newErr = new Error();
             newErr.status = 401;
             next(newErr);
@@ -30,6 +32,25 @@ module.exports = async (req, res, next) => {
         } else {
             next(err);
         }
+        return;
+    }
+
+    let user;
+    try {
+        user = User.findOne({
+            email: decodedToken.email,
+            token_key: decodedToken.token_key,
+        });
+    } catch (err) {
+        next(err);
+        return;
+    }
+
+    if (!user) {
+        const newErr = new Error();
+        newErr.status = 401;
+        next(newErr);
+        logger.info(`Invalid token key: ${token}`);
         return;
     }
 

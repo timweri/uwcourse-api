@@ -7,6 +7,7 @@ const dev = {
         port: parseInt(process.env.DEV_APP_PORT) || 5000,
         endpoint: process.env.ENDPOINT || endpoint,
         auth_header: 'x-wauth',
+        token_key_length: 16,
     },
     db: {
         host: process.env.DEV_DB_HOST || 'mongodb://mongodb',
@@ -21,6 +22,7 @@ const test = {
         port: parseInt(process.env.TEST_APP_PORT) || 5000,
         endpoint: process.env.ENDPOINT || endpoint,
         auth_header: 'x-wauth',
+        token_key_length: 16,
     },
     db: {
         host: process.env.TEST_DB_HOST || 'mongodb://mongodb',

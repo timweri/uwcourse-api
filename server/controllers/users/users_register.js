@@ -5,6 +5,7 @@ const logger = require(`${approot}/config/winston`)(TAG);
 const User = require(`${approot}/models/User`);
 const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
+const randomstring = require('randomstring');
 const config = require(`${approot}/config/config`);
 
 const passwordValidator = require(`${approot}/utils/users/validators/password_validator`);
@@ -40,8 +41,11 @@ module.exports = async (req, res, next) => {
         return;
     }
 
+    const token_key = randomstring.generate(config.app.token_key_length);
+
     const user = new User({
         email,
+        token_key,
         password: hashed_password,
         last_login_at: new Date(),
     });
@@ -55,6 +59,6 @@ module.exports = async (req, res, next) => {
     }
     logger.verbose(`Created user ${email}`);
     result.status = 201;
-    result.result = jwt.sign({email: email}, config.secret, {expiresIn: '3h'});
+    result.result = jwt.sign({email, token_key}, config.secret, {expiresIn: '3h'});
     res.status(result.status).send(result);
 };
