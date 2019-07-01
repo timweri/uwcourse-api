@@ -9,11 +9,17 @@ module.exports = async (err, req, res, next) => {
     const result = {};
 
     if (err.name === 'ValidationError') {
-        logger.info(err.toString());
-        result.status = 400;
         for (const errorField in err.errors) {
             if (err.errors.hasOwnProperty(errorField)) {
-                result.error = err.errors[errorField].message;
+                if (err.errors[errorField].path === 'token_key') {
+                    logger.error(err.stack);
+                    result.status = 500;
+                    result.error = 'Server error';
+                } else {
+                    logger.info(err.toString());
+                    result.status = 400;
+                    result.error = `${err.errors[errorField].path}: ${err.errors[errorField].message}`;
+                }
                 break;
             }
         }
