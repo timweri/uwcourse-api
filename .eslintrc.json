@@ -15,7 +15,13 @@
     "rules": {
         "no-unused-vars": "warn",
         "no-console": "off",
-        "comma-dangle": ["error", "always-multiline"],
+        "comma-dangle": ["error", {
+            "arrays": "always-multiline",
+            "objects": "always-multiline",
+            "imports": "always-multiline",
+            "exports": "always-multiline",
+            "functions": "always-multiline"
+        }],
         "comma-spacing": ["error", {"before": false, "after": true}],
         "comma-style": ["error", "last"],
         "semi": ["error", "always"],

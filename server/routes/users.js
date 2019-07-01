@@ -20,14 +20,14 @@ module.exports = (router) => {
         [
             '/users/self',
         ],
-        user_controller.users_validate_token
+        user_controller.users_validate_token,
     );
 
     router.get(
         [
             '/users/self',
         ],
-        user_controller.users_fetch_token_user
+        user_controller.users_fetch_token_user,
     );
 
     router.get('/users/self', user_controller.users_get_self);
