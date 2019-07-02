@@ -13,7 +13,7 @@ module.exports = (router) => {
         check_empty_body,
     );
 
-    router.post('/users', user_controller.users_register);
+    router.put('/users', user_controller.users_register);
     router.post('/users/tokens', user_controller.users_login);
 
     router.use(
@@ -23,7 +23,7 @@ module.exports = (router) => {
         user_controller.users_validate_token,
     );
 
-    router.get(
+    router.use(
         [
             '/users/self',
         ],
@@ -32,5 +32,5 @@ module.exports = (router) => {
 
     router.get('/users/self', user_controller.users_get_self);
 
-    router.use(user_controller.users_error);
+    router.post('/users/self', user_controller.users_modify_self);
 };

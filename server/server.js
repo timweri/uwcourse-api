@@ -16,7 +16,18 @@ app.use(addRequestId);
 app.use(bodyParser.urlencoded({
     extended: true,
 }));
-app.use(bodyParser.json());
+app.use((req, res, next) => {
+    bodyParser.json()(req, res, err => {
+        const result = {};
+        if (err) {
+            result.status = 400;
+            result.error = 'Invalid JSON body';
+            return res.status(400).send(result);
+        }
+
+        next();
+    });
+});
 
 const mongoose = require('mongoose');
 mongoose.connect(`${config.db.host}:${config.db.port}/${config.db.name}`, {useNewUrlParser: true});

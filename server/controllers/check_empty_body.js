@@ -4,7 +4,7 @@ const TAG = path.basename(__filename);
 const logger = require(`${approot}/config/winston`)(TAG);
 
 module.exports = async (req, res, next) => {
-    if (!req.hasOwnProperty('body') || !req.body) {
+    if (!req.hasOwnProperty('body') || !req.body || Object.keys(req.body).length === 0) {
         const newErr = new Error();
         newErr.status = 400;
         next(newErr);
