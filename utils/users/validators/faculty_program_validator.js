@@ -1,13 +1,15 @@
-const POSSIBLE_FACULTY = ['Applied Health Sciences', 'Arts', 'Engineering', 'Environment', 'Mathematics', 'Science'];
 const VALID_PROGRAMS = {
-    'Applied Health Sciences': ['Health Studies',
+    'Applied Health Sciences': [
+        'Health Studies',
         'Kinesiology',
         'Public Health',
         'Recreation and Leisure Studies',
         'Recreation and Sport Business',
         'Therapeutic Recreation',
-        'Tourism Development'],
-    'Arts': ['Accounting and Financial Management',
+        'Tourism Development',
+    ],
+    'Arts': [
+        'Accounting and Financial Management',
         'Anthropology',
         'Classical Studies',
         'Computing and Financial Management',
@@ -35,8 +37,10 @@ const VALID_PROGRAMS = {
         'Sociology',
         'Spanish',
         'Speech Communication',
-        'Theatre and Performance'],
-    'Engineering': ['Architectural Engineering',
+        'Theatre and Performance',
+    ],
+    'Engineering': [
+        'Architectural Engineering',
         'Architecture',
         'Biomedical Engineering',
         'Chemical Engineering',
@@ -50,16 +54,20 @@ const VALID_PROGRAMS = {
         'Mechatronics Engineering',
         'Nanotechnology Engineering',
         'Software Engineering',
-        'Systems Design Engineering'],
-    'Environment': ['Environment and Business',
+        'Systems Design Engineering',
+    ],
+    'Environment': [
+        'Environment and Business',
         'Environment, Resources and Sustainability',
         'Geography and Aviation',
         'Geography and Environmental Management',
         'Geomatics',
         'International Development',
         'Knowledge Integration',
-        'Planning'],
-    'Mathematics': ['Computer Science (UW)/Business Administration (WLU) Double Degree',
+        'Planning',
+    ],
+    'Mathematics': [
+        'Computer Science (UW)/Business Administration (WLU) Double Degree',
         'Mathematics (UW)/Business Administration (WLU) Double Degree',
         'Computer Science',
         'Data Science',
@@ -81,8 +89,10 @@ const VALID_PROGRAMS = {
         'Mathematical Physics',
         'Mathematics Teaching',
         'Pure Mathematics',
-        'Statistics'],
-    'Science': ['Biotechnology/Chartered Professional Accounting',
+        'Statistics',
+    ],
+    'Science': [
+        'Biotechnology/Chartered Professional Accounting',
         'Biotechnology/Economics',
         'Environmental Science',
         'Honours Science',
@@ -101,21 +111,25 @@ const VALID_PROGRAMS = {
         'Physics',
         'Physics and Astronomy',
         'Science and Aviation',
-        'Science and Business'],
-    'Others': ['Optometry', 'Pharmacy', 'Social Work'],
+        'Science and Business',
+    ],
+    'Others': [
+        'Optometry',
+        'Pharmacy',
+        'Social Work',
+    ],
 };
 
-exports.POSSIBLE_FACULTY = POSSIBLE_FACULTY;
 exports.VALID_PROGRAMS = VALID_PROGRAMS;
 
 // Takes in a String representing a faculty
 // Check if the faculty is valid
 exports.validateFaculty = (faculty) => {
-    return POSSIBLE_FACULTY.includes(faculty);
+    return VALID_PROGRAMS.hasOwnProperty(faculty);
 };
 
-exports.validateProgram = async (faculty, program) => {
-    if (POSSIBLE_FACULTY.includes(faculty))
+exports.validateProgram = (faculty, program) => {
+    if (VALID_PROGRAMS.hasOwnProperty(faculty))
         return VALID_PROGRAMS[faculty].includes(program);
     else
         return false;

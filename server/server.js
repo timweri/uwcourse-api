@@ -42,6 +42,5 @@ db.once('open', () => {
 
     app.listen(config.app.port, () => {
         logger.verbose(`Server now listening at localhost:${config.app.port}`);
-        console.log(`Server now listening at localhost:${config.app.port}`);
     });
 });
