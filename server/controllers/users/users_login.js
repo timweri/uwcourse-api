@@ -46,9 +46,11 @@ module.exports = async (req, res, next) => {
             result.status = 200;
             result.result = jwt.sign({email, token_key: user.token_key}, config.secret, {expiresIn: '3h'});
         } else {
+            const newErr = new Error('Authentication failed: Wrong password');
+            newErr.status = 401;
+            next(newErr);
             logger.info(`Failed to authenticate ${email}: Wrong password`);
-            result.status = 401;
-            result.error = 'Authentication failed: Wrong password';
+            return;
         }
     } catch (err) {
         err.status = 500;

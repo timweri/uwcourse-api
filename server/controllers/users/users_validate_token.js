@@ -37,7 +37,7 @@ module.exports = async (req, res, next) => {
 
     let user;
     try {
-        user = User.findOne({
+        user = await User.findOne({
             email: decodedToken.email,
             token_key: decodedToken.token_key,
         });
@@ -53,6 +53,7 @@ module.exports = async (req, res, next) => {
         logger.info(`Invalid token key: ${token}`);
         return;
     }
+    logger.info(`Valid token key: ${token}`);
 
     req.token = {
         raw: token,

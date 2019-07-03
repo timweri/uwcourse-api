@@ -96,7 +96,7 @@ UserSchema.pre(/^(update|updateOne|findOneAndUpdate)$/, function (next) {
             new mongoose.Error.ValidatorError({
                 path: 'faculty',
                 message: 'Missing faculty',
-                kind: 'existst',
+                kind: 'exists',
             }),
         );
         return next(validationError);
