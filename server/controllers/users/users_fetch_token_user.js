@@ -13,15 +13,14 @@ module.exports = async (req, res, next) => {
     try {
         user = await User.findOne({email});
     } catch (err) {
-        next(err);
-        return;
+        return next(err);
     }
 
     if (!user) {
         const newErr = new Error('User not found');
         newErr.status = 404;
-        logger.info(`User ${email} not found`);
         next(newErr);
+        logger.info(`User ${email} not found`);
         return;
     }
 

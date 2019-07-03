@@ -29,10 +29,10 @@ module.exports = async (req, res, next) => {
             newErr.status = 401;
             next(newErr);
             logger.info(`Invalid token: ${token}`);
+            return;
         } else {
-            next(err);
+            return next(err);
         }
-        return;
     }
 
     let user;
@@ -42,8 +42,7 @@ module.exports = async (req, res, next) => {
             token_key: decodedToken.token_key,
         });
     } catch (err) {
-        next(err);
-        return;
+        return next(err);
     }
 
     if (!user) {

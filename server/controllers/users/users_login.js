@@ -12,7 +12,7 @@ module.exports = async (req, res, next) => {
 
     const result = {};
 
-    if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('email') || !req.body.hasOwnProperty('password')) {
+    if (!req.body.hasOwnProperty('email') || !req.body.hasOwnProperty('password')) {
         const newErr = new Error('Missing Email and/or Password');
         newErr.status = 400;
         return next(newErr);

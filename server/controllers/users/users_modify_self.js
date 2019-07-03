@@ -102,8 +102,7 @@ module.exports = async (req, res, next) => {
     try {
         await user.updateOne(changes, {runValidators: true});
     } catch (err) {
-        next(err);
-        return;
+        return next(err);
     }
 
     result.status = 200;
