@@ -16,12 +16,28 @@
  * @param email
  * @return boolean - true if passes and false if fails
  */
-const test = (email) => {
+const testWithEmailSuffix = (email) => {
     if (!email) return false;
-    if (typeof email !== "string") return false;
+    if (typeof email !== 'string') return false;
     if (email.length < 19 || email.length > 25) return false;
 
     return /^[a-z0-9]{6,12}@uwaterloo.ca$/.test(email);
 };
 
-exports.test = test;
+exports.testWithEmailSuffix = testWithEmailSuffix;
+
+/**
+ * Test email against above rules but in the case where only the WatIAM ID is given (no @uwaterloo.ca).
+ *
+ * @param email
+ * @return boolean - true if passes and false if fails
+ */
+const testWithoutEmailSuffix = (email) => {
+    if (!email) return false;
+    if (typeof email !== 'string') return false;
+    if (email.length < 6 || email.length > 12) return false;
+
+    return /^[a-z0-9]{6,12}$/.test(email);
+};
+
+exports.testWithoutEmailSuffix = testWithoutEmailSuffix;

@@ -21,7 +21,8 @@ module.exports = async (req, res, next) => {
         return next(newErr);
     }
 
-    const {email, password} = req.body;
+    const password = req.body.password;
+    const email = req.body.email.toLowerCase();
 
     // Validate password
     if (!passwordValidator.test(password)) {

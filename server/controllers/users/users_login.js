@@ -18,7 +18,8 @@ module.exports = async (req, res, next) => {
         return next(newErr);
     }
 
-    const {email, password} = req.body;
+    const password = req.body.password;
+    const email = req.body.email.toLowerCase();
 
     let user;
     try {

@@ -21,6 +21,7 @@ module.exports = async (req, res, next) => {
     let decodedToken;
     try {
         decodedToken = jwt.verify(token, config.secret);
+        decodedToken.email = decodedToken.email.toLowerCase();
         logger.info(`Valid token: ${token}`);
     } catch (err) {
         if ((err.name === 'JsonWebTokenError' && err.message === 'invalid signature') ||

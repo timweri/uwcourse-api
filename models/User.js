@@ -1,9 +1,9 @@
 const approot = require('app-root-path');
 const mongoose = require('mongoose');
-const emailValidator = require(`${approot}/utils/users/validators/email_validator`);
 const Schema = mongoose.Schema;
 const config = require(`${approot}/config/config`);
 
+const emailValidator = require(`${approot}/utils/users/validators/email_validator`);
 const facultyProgramValidator = require(`${approot}/utils/users/validators/faculty_program_validator`);
 
 /**
@@ -37,7 +37,7 @@ const UserSchema = new Schema({
         unique: true,
         validate: [
             async (value) => {
-                return emailValidator.test(value);
+                return emailValidator.testWithEmailSuffix(value);
             },
             'Invalid email',
             'invalid',

@@ -16,6 +16,8 @@ module.exports = (router) => {
     router.put('/users', user_controller.users_register);
     router.post('/users/tokens', user_controller.users_login);
 
+    router.get('/users/:email', user_controller.users_get_by_email);
+
     router.use(
         [
             '/users/self',
