@@ -46,7 +46,6 @@ module.exports = async (req, res, next) => {
 
     result.status = 200;
     result.data = {
-        _id: user._id,
         name: user.name,
         email: user.email,
         avatar_url: user.avatar_url,
