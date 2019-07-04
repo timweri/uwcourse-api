@@ -1,0 +1,6 @@
+/*
+Controller to search users by their name.
+Returns a paginated list.
+Requirement for the search is not decided.
+Not needed for now.
+ */
