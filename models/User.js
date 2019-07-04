@@ -27,7 +27,7 @@ const UserSchema = new Schema({
                 '[A-Za-z .,\'-]+' + // Accept only these character
                 '$',
             ),
-            'Name contains forbidden characters, characters at forbidden positions or forbidden combination of characters',
+            'Invalid name',
         ],
     },
     email: {

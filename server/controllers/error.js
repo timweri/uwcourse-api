@@ -14,11 +14,11 @@ module.exports = async (err, req, res, next) => {
                 if (err.errors[errorField].path === 'token_key') {
                     logger.error(err.stack);
                     result.status = 500;
-                    result.error = 'Server error';
+                    result.error = '500 Server error';
                 } else {
                     logger.info(err.toString());
                     result.status = 400;
-                    result.error = `${err.errors[errorField].path}: ${err.errors[errorField].message}`;
+                    result.error = err.errors[errorField].message;
                 }
                 break;
             }
@@ -29,17 +29,17 @@ module.exports = async (err, req, res, next) => {
             result.error = err.message;
         } else switch (err.status) {
             case 400:
-                result.error = 'Bad request';
+                result.error = '400 Bad request';
                 break;
             case 401:
-                result.error = 'Unauthorized';
+                result.error = '401 Unauthorized';
                 break;
             case 404:
-                result.error = 'Not found';
+                result.error = '404 Not found';
                 break;
             case 500:
                 logger.error(err.stack);
-                result.error = 'Server error';
+                result.error = '500 Server error';
                 break;
             default:
                 result.error = '';
@@ -47,7 +47,7 @@ module.exports = async (err, req, res, next) => {
     } else {
         logger.error(err.stack);
         result.status = 500;
-        result.error = 'Server error';
+        result.error = '500 Server error';
     }
-    res.status(result.status).send(result);
+    res.status(result.status).send(result.error);
 };
