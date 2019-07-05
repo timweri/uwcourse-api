@@ -13,16 +13,16 @@ const passwordValidator = require(`${approot}/utils/users/validators/password_va
 module.exports = async (req, res, next) => {
     logger.setId(req.id);
 
-    const result = {};
+    const response = {};
 
-    if (!req.body.hasOwnProperty('email') || !req.body.hasOwnProperty('password')) {
-        const newErr = new Error('Missing Email and/or Password');
+    if (!req.body.hasOwnProperty('username') || !req.body.hasOwnProperty('password')) {
+        const newErr = new Error('Missing username and/or password');
         newErr.status = 400;
         return next(newErr);
     }
 
     const password = req.body.password;
-    const email = req.body.email.toLowerCase();
+    const username = req.body.username.toLowerCase();
 
     // Validate password
     if (!passwordValidator.test(password)) {
@@ -45,7 +45,7 @@ module.exports = async (req, res, next) => {
     const token_key = randomstring.generate(config.app.token_key_length);
 
     const user = new User({
-        email,
+        username,
         token_key,
         password: hashed_password,
         last_login_at: new Date(),
@@ -55,11 +55,10 @@ module.exports = async (req, res, next) => {
         await user.save();
     } catch (err) {
         next(err);
-        logger.info(`Failed to create user ${email}`);
+        logger.info(`Failed to create user ${username}`);
         return;
     }
-    logger.verbose(`Created user ${email}`);
-    result.status = 201;
-    result.result = jwt.sign({email, token_key}, config.secret, {expiresIn: '3h'});
-    res.status(result.status).send(result);
+    logger.verbose(`Created user ${username}`);
+    response.data = jwt.sign({username, token_key}, config.secret, {expiresIn: '3h'});
+    res.status(201).send(response);
 };

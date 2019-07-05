@@ -21,7 +21,10 @@ module.exports = async (req, res, next) => {
     let decodedToken;
     try {
         decodedToken = jwt.verify(token, config.secret);
-        decodedToken.email = decodedToken.email.toLowerCase();
+        if (!decodedToken.hasOwnProperty('username') || !decodedToken.hasOwnProperty('token_key')) {
+            return next(new Error(`Invalid token ${token}`));
+        }
+        decodedToken.username = decodedToken.username.toLowerCase();
         logger.info(`Valid token: ${token}`);
     } catch (err) {
         if ((err.name === 'JsonWebTokenError' && err.message === 'invalid signature') ||
@@ -39,7 +42,7 @@ module.exports = async (req, res, next) => {
     let user;
     try {
         user = await User.findOne({
-            email: decodedToken.email,
+            username: decodedToken.username,
             token_key: decodedToken.token_key,
         });
     } catch (err) {
@@ -57,7 +60,7 @@ module.exports = async (req, res, next) => {
 
     req.token = {
         raw: token,
-        email: decodedToken.email,
+        username: decodedToken.username,
     };
     next();
 };

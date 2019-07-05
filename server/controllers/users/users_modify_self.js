@@ -11,7 +11,7 @@ const passwordValidator = require(`${approot}/utils/users/validators/password_va
 module.exports = async (req, res, next) => {
     logger.setId(req.id);
 
-    const result = {};
+    const response = {};
 
     const user = req.user;
     const changes = {$set: {}, $addToSet: {}};
@@ -105,8 +105,7 @@ module.exports = async (req, res, next) => {
         return next(err);
     }
 
-    result.status = 200;
-    result.message = 'Successfully updated profile';
-    logger.info(`Successfully updated ${user.email}'s profile`);
-    res.status(result.status).send(result);
+    response.data = 'Successfully updated profile';
+    logger.info(`Successfully updated ${user.username}'s profile`);
+    res.status(200).send(response);
 };

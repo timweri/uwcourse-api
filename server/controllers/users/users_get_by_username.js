@@ -7,7 +7,15 @@ const User = require(`${approot}/models/User`);
 module.exports = async (req, res, next) => {
     logger.setId(req.id);
 
-    const username = req.token.username;
+    const response = {};
+
+    const username = req.params.username.toLowerCase();
+
+    if (username === 'self') return next();
+
+    if (username == null) {
+        return next(new Error('Username cannot be null'));
+    }
 
     let user;
     try {
@@ -24,6 +32,14 @@ module.exports = async (req, res, next) => {
         return;
     }
 
-    req.user = user;
-    next();
+    response.data = {
+        name: user.name,
+        username: user.username,
+        avatar_url: user.avatar_url,
+        favourite_courses: user.favourite_courses,
+        terms: user.terms,
+        created_at: user.created_at,
+    };
+
+    res.status(200).send(response);
 };

@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const config = require(`${approot}/config/config`);
 
-const emailValidator = require(`${approot}/utils/users/validators/email_validator`);
 const facultyProgramValidator = require(`${approot}/utils/users/validators/faculty_program_validator`);
 
 /**
@@ -30,17 +29,14 @@ const UserSchema = new Schema({
             'Invalid name',
         ],
     },
-    email: {
+    username: {
         type: String,
-        required: [true, 'Email is required'],
+        required: [true, 'Username is required'],
         index: true,
         unique: true,
-        validate: [
-            async (value) => {
-                return emailValidator.testWithEmailSuffix(value);
-            },
-            'Invalid email',
-            'invalid',
+        match: [
+            new RegExp('^[a-z0-9]{6,12}$'),
+            'Invalid username',
         ],
     },
     avatar_url: {
@@ -157,15 +153,15 @@ UserSchema.pre('save', function (next) {
 
 const User = mongoose.model('User', UserSchema);
 
-// Check duplicate email
-User.schema.path('email')
+// Check duplicate username
+User.schema.path('username')
     .validate(async (value) => {
         try {
-            const user = await User.findOne({email: value});
+            const user = await User.findOne({username: value});
             return (user === null);
         } catch (err) {
             throw err;
         }
-    }, 'Email already exists', 'exists');
+    }, 'Username already exists', 'exists');
 
 module.exports = User;
