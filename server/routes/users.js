@@ -35,4 +35,6 @@ module.exports = (router) => {
     router.get('/users/self', user_controller.users_get_self);
 
     router.post('/users/self', user_controller.users_modify_self);
+
+    router.get('/users', user_controller.users_search_by_username);
 };
