@@ -1,6 +1,5 @@
 const approot = require('app-root-path');
-const path = require('path');
-const TAG = path.basename(__filename);
+const TAG = __filename.slice(__dirname.length + 1, -3);
 const logger = require(`${approot}/config/winston`)(TAG);
 const jwt = require('jsonwebtoken');
 const User = require(`${approot}/models/User`);
