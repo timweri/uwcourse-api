@@ -4,7 +4,7 @@ const logger = require(`${approot}/config/winston`)(TAG);
 const argon2 = require('argon2');
 const randomstring = require('randomstring');
 const config = require(`${approot}/config/config`);
-
+const errorBuilder = require(`${approot}/controllers/utils/error_response_builder`);
 const passwordValidator = require(`${approot}/utils/users/validators/password_validator`);
 
 module.exports = async (req, res, next) => {
@@ -29,71 +29,46 @@ module.exports = async (req, res, next) => {
                     break;
                 case 'new_password':
                     if (!req.body.hasOwnProperty('old_password')) {
-                        const newErr = new Error('Missing old password');
-                        newErr.status = 400;
-                        next(newErr);
                         logger.info(`Failed to authenticate password change for ${user.email}: Missing old password`);
-                        return;
+                        return next(errorBuilder('Missing old password'), 400);
                     }
 
                     if (req.body.old_password === req.body.new_password) {
-                        const newErr = new Error('Identical new and old password');
-                        newErr.status = 400;
-                        next(newErr);
                         logger.info(`Failed to authenticate password change for ${user.email}: Identical password`);
-                        return;
+                        return next(errorBuilder('Identical new and old password', 400));
                     }
 
                     // Validate new password
                     if (!passwordValidator.test(req.body[key])) {
-                        const newErr = new Error('Invalid new password');
-                        newErr.status = 400;
-                        next(newErr);
                         logger.info(`Failed to authenticate password change for ${user.email}: Invalid new password`);
-                        return;
+                        return next(errorBuilder('Invalid new password', 400));
                     }
 
                     // Check old password
                     try {
                         if (!await argon2.verify(user.password, req.body.old_password)) {
-                            const newErr = new Error('Authentication failed: Wrong old password');
-                            newErr.status = 401;
-                            next(newErr);
                             logger.info(`Failed to authenticate password change for ${user.email}: Wrong password`);
-                            return;
+                            return next(errorBuilder('Authentication failed: Wrong old password', 401));
                         }
                     } catch (err) {
-                        err.status = 500;
-                        next(err);
                         logger.error(`Failed to verify argon2 password ${user.password}`);
-                        return;
+                        return next(err);
                     }
 
                     try {
                         changes.$set.password = await argon2.hash(req.body[key]);
                     } catch (err) {
-                        const newErr = new Error();
-                        newErr.status = 500;
-                        next(newErr);
                         logger.error('Failed to hash password');
-                        return;
+                        return next(err);
                     }
 
                     // Change token key
                     changes.$set.token_key = randomstring.generate(config.app.token_key_length);
 
                     break;
-                case 'favourite_courses':
-                    changes.$addToSet[key] = req.body[key];
-                    break;
-                case 'terms':
-                    break;
                 default:
-                    newErr = new Error(`Cannot modify field ${key}`);
-                    newErr.status = 400;
-                    next(newErr);
                     logger.info(newErr.message);
-                    return;
+                    return next(errorBuilder(`Cannot modify field ${key}`, 400));
             }
         }
     }

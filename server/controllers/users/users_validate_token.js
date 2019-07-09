@@ -4,35 +4,30 @@ const logger = require(`${approot}/config/winston`)(TAG);
 const jwt = require('jsonwebtoken');
 const User = require(`${approot}/models/User`);
 const config = require(`${approot}/config/config`);
+const errorBuilder = require(`${approot}/controllers/utils/error_response_builder`);
 
 module.exports = async (req, res, next) => {
     logger.setId(req.id);
 
     const token = req.header(config.app.auth_header);
     if (!token) {
-        const newErr = new Error();
-        newErr.status = 401;
-        next(newErr);
         logger.info('Missing token');
-        return;
+        return next(errorBuilder(null, 401));
     }
 
     let decodedToken;
     try {
         decodedToken = jwt.verify(token, config.secret);
         if (!decodedToken.hasOwnProperty('username') || !decodedToken.hasOwnProperty('token_key')) {
-            return next(new Error(`Invalid token ${token}`));
+            return next(errorBuilder(`Invalid token ${token}`));
         }
         decodedToken.username = decodedToken.username.toLowerCase();
         logger.info(`Valid token: ${token}`);
     } catch (err) {
         if ((err.name === 'JsonWebTokenError' && err.message === 'invalid signature') ||
             (err.name === 'TokenExpiredError' && err.message === 'jwt expired')) {
-            const newErr = new Error();
-            newErr.status = 401;
-            next(newErr);
             logger.info(`Invalid token: ${token}`);
-            return;
+            return next(errorBuilder(null, 401));
         } else {
             return next(err);
         }
@@ -49,11 +44,8 @@ module.exports = async (req, res, next) => {
     }
 
     if (!user) {
-        const newErr = new Error();
-        newErr.status = 401;
-        next(newErr);
         logger.info(`Invalid token key: ${token}`);
-        return;
+        return next(errorBuilder(null, 401));
     }
     logger.info(`Valid token key: ${token}`);
 

@@ -6,7 +6,7 @@ const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
 const randomstring = require('randomstring');
 const config = require(`${approot}/config/config`);
-
+const errorBuilder = require(`${approot}/controllers/utils/error_response_builder`);
 const passwordValidator = require(`${approot}/utils/users/validators/password_validator`);
 
 module.exports = async (req, res, next) => {
@@ -15,9 +15,7 @@ module.exports = async (req, res, next) => {
     const response = {};
 
     if (!req.body.hasOwnProperty('username') || !req.body.hasOwnProperty('password')) {
-        const newErr = new Error('Missing username and/or password');
-        newErr.status = 400;
-        return next(newErr);
+        return next(errorBuilder('Missing username/password', 400));
     }
 
     const password = req.body.password;
@@ -25,20 +23,15 @@ module.exports = async (req, res, next) => {
 
     // Validate password
     if (!passwordValidator.test(password)) {
-        const newErr = new Error('Invalid password');
-        newErr.status = 400;
-        return next(newErr);
+        return next(errorBuilder('Invalid password', 400));
     }
 
     let hashed_password;
     try {
         hashed_password = await argon2.hash(password);
     } catch (err) {
-        const newErr = new Error();
-        newErr.status = 500;
-        next(newErr);
         logger.error('Failed to hash password');
-        return;
+        return next(errorBuilder(null, 500));
     }
 
     const token_key = randomstring.generate(config.app.token_key_length);
@@ -53,9 +46,8 @@ module.exports = async (req, res, next) => {
     try {
         await user.save();
     } catch (err) {
-        next(err);
         logger.info(`Failed to create user ${username}`);
-        return;
+        return next(err);
     }
     logger.verbose(`Created user ${username}`);
     response.data = jwt.sign({username, token_key}, config.secret, {expiresIn: '3h'});

@@ -2,6 +2,7 @@ const approot = require('app-root-path');
 const TAG = __filename.slice(__dirname.length + 1, -3);
 const logger = require(`${approot}/config/winston`)(TAG);
 const User = require(`${approot}/models/User`);
+const errorBuilder = require(`${approot}/controllers/utils/error_response_builder`);
 
 module.exports = async (req, res, next) => {
     logger.setId(req.id);
@@ -9,9 +10,7 @@ module.exports = async (req, res, next) => {
     const response = {};
 
     if (!req.query.hasOwnProperty('username')) {
-        const newErr = new Error('Missing username');
-        newErr.status = 400;
-        return next(newErr);
+        return next(errorBuilder('Missing username', 400));
     }
 
     const username = req.query.username.toLowerCase();
@@ -26,12 +25,12 @@ module.exports = async (req, res, next) => {
 
     if (req.query.hasOwnProperty('limit')) {
         const temp = parseInt(req.query.limit);
-        if (!isNaN(temp)) limit = temp;
+        if (!isNaN(temp) && temp > 0) limit = temp;
     }
 
     if (req.query.hasOwnProperty('skip')) {
         const temp = parseInt(req.query.skip);
-        if (!isNaN(temp)) skip = temp;
+        if (!isNaN(temp) && temp > 0) skip = temp;
     }
 
     if (req.query.hasOwnProperty('anchor_left')) {
