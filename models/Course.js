@@ -4,21 +4,6 @@ const Schema = mongoose.Schema;
 const OverallRatingSchema = require('./subschemas/OverallRating');
 
 /**
- * Course Schema Subdocuments
- */
-
-const OfferingSchema = new Schema({
-    online: Boolean,
-    online_only: Boolean,
-    st_jerome: Boolean,
-    st_jerome_only: Boolean,
-    renison: Boolean,
-    renison_only: Boolean,
-    conrad_grebel: Boolean,
-    conrad_grebel_only: Boolean,
-}, {_id: false});
-
-/**
  * Course Schema
  */
 
@@ -45,34 +30,19 @@ const CourseSchema = new Schema({
         required: true,
         index: true,
     },
-    units: {
-        type: Number,
-        required: true,
-    },
-    description: String,
-    academic_level: String,
-    instructions: [String],
     instructors: [{type: Schema.Types.ObjectId, ref: 'Instructor'}],
     easy_rating: OverallRatingSchema,
     useful_rating: OverallRatingSchema,
     liked_rating: OverallRatingSchema,
-    ratings: [{type: Schema.Types.ObjectId, ref: 'CourseRating'}],
-    prerequisites: String,
-    antirequisites: String,
-    corequisites: String,
-    crosslistings: String,
-    terms_offered: [String],
-    term_id: {
-        type: Schema.Types.ObjectId,
-        required: true,
-        ref: 'Term',
+    rating: OverallRatingSchema,
+    liked_count: {
+        type: Number,
+        default: 0,
+        validate: {
+            validator: v => Number.isInteger(v) && v >= 0,
+            message: 'liked_count is not a natural number',
+        },
     },
-    offerings: OfferingSchema,
-    needs_department_consent: Boolean,
-    needs_instructor_consent: Boolean,
-    notes: String,
-    extra: [],
-    schedule: [{type: Schema.Types.ObjectId, ref: 'CourseSchedule'}],
     updated_at: {
         type: Date,
         default: new Date(),
