@@ -10,46 +10,41 @@ const errorBuilder = require(`${approot}/controllers/utils/error_response_builde
 const passwordValidator = require(`${approot}/utils/users/validators/password_validator`);
 
 module.exports = async (req, res, next) => {
-    logger.setId(req.id);
-
-    const response = {};
-
-    if (!req.body.hasOwnProperty('username') || !req.body.hasOwnProperty('password')) {
-        return next(errorBuilder('Missing username/password', 400));
-    }
-
-    const password = req.body.password;
-    const username = req.body.username.toLowerCase();
-
-    // Validate password
-    if (!passwordValidator.test(password)) {
-        return next(errorBuilder('Invalid password', 400));
-    }
-
-    let hashed_password;
     try {
-        hashed_password = await argon2.hash(password);
-    } catch (err) {
-        logger.error('Failed to hash password');
-        return next(errorBuilder(null, 500));
-    }
+        logger.setId(req.id);
 
-    const token_key = randomstring.generate(config.app.token_key_length);
+        const response = {};
 
-    const user = new User({
-        username,
-        token_key,
-        password: hashed_password,
-        last_login_at: new Date(),
-    });
+        if (!req.body.hasOwnProperty('username') || !req.body.hasOwnProperty('password')) {
+            return next(errorBuilder('Missing username/password', 400));
+        }
 
-    try {
+        const password = req.body.password;
+        const username = req.body.username.toLowerCase();
+
+        // Validate password
+        if (!passwordValidator.test(password)) {
+            return next(errorBuilder('Invalid password', 400));
+        }
+
+        const hashed_password = await argon2.hash(password);
+
+        const token_key = randomstring.generate(config.app.token_key_length);
+
+        const user = new User({
+            username,
+            token_key,
+            password: hashed_password,
+            last_login_at: new Date(),
+        });
+
         await user.save();
+
+        logger.verbose(`Created user ${username}`);
+        response.data = jwt.sign({username, token_key}, config.secret, {expiresIn: '3h'});
+        res.status(201)
+            .send(response);
     } catch (err) {
-        logger.info(`Failed to create user ${username}`);
         return next(err);
     }
-    logger.verbose(`Created user ${username}`);
-    response.data = jwt.sign({username, token_key}, config.secret, {expiresIn: '3h'});
-    res.status(201).send(response);
 };
