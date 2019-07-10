@@ -14,6 +14,14 @@ module.exports = (router) => {
         check_empty_body,
     );
 
+    router.get(
+        [
+            '/users/self',
+            '/users/:username',
+        ],
+        user_controller.users_parse_populate_profile_flags,
+    );
+
     router.put('/users', user_controller.users_register);
     router.post('/users/tokens', user_controller.users_login);
 
