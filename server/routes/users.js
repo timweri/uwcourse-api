@@ -9,6 +9,7 @@ module.exports = (router) => {
             '/users',
             '/users/tokens',
             '/users/self',
+            '/users/favourite_courses',
         ],
         check_empty_body,
     );
@@ -21,6 +22,7 @@ module.exports = (router) => {
     router.use(
         [
             '/users/self',
+            '/users/favourite_courses',
         ],
         user_controller.users_validate_token,
     );
@@ -28,9 +30,12 @@ module.exports = (router) => {
     router.use(
         [
             '/users/self',
+            '/users/favourite_courses',
         ],
         user_controller.users_fetch_token_user,
     );
+
+    router.post('/users/favourite_courses', user_controller.users_modify_fav_courses);
 
     router.get('/users/self', user_controller.users_get_self);
 
