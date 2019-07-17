@@ -56,3 +56,10 @@ set :port, 4567
 helpers do
   require './lib/toc_data.rb'
 end
+
+# Global Variables
+set :domain, 'https://domain.com'
+config[:domain]
+
+set :api_v, 'api/v1'
+config[:api_v]
