@@ -41,5 +41,14 @@ services:
       ME_CONFIG_BASICAUTH_USERNAME: admin
       ME_CONFIG_BASICAUTH_PASSWORD: 123456
       ME_CONFIG_MONGODB_SERVER: uwcourse-mongodb
+  doc:
+    build:
+      context: .
+      dockerfile: Dockerfile-doc
+    container_name: uwcourse-api-doc
+    ports:
+      - "4567:4567"
+    volumes:
+      - ./doc:/uwcourse-doc
 volumes:
   mongodata:

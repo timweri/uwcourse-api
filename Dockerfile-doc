@@ -1,0 +1,17 @@
+FROM ruby:2.3-alpine
+MAINTAINER Duc Thanh Nguyen (ng.duc.tahn@gmail.com)
+
+COPY ./doc/Gemfile /uwcourse-doc/Gemfile
+COPY ./doc/Gemfile.lock /uwcourse-doc/Gemfile.lock
+
+RUN apk add --update nodejs g++ make
+RUN bundle install
+
+COPY ./doc /uwcourse-doc
+VOLUME /uwcourse-doc
+
+EXPOSE 4567
+
+WORKDIR /uwcourse-doc
+
+CMD ["bundle", "exec", "middleman", "server", "--watcher-force-polling"]
