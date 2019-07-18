@@ -50,12 +50,12 @@ You must replace <code>api_key</code> with the actual API key.
 ```json
 {
   "_id": "5d2eb0c88131a99cb3d6decb",
-  "name": "Billy Jeans",
   "username": "notmylover",
+  "name": "Billy Jeans",
   "avatar_url": "<%= config[:domain] %>/pictures/avatar.jpg",
   "faculty": "Mathematics",
-  "is_verified": true,
   "program": "Computer Science",
+  "is_verified": true,
   "favourite_courses": [],
   "taken_courses": [],
   "views": 13,
@@ -65,12 +65,29 @@ You must replace <code>api_key</code> with the actual API key.
 }
 ```
 
-The table below illustrates how the publicly exposed User model is defined:
+The list of fields below illustrates how the publicly exposed User model is defined:
 
-Field | Description
------ | -----------
-_id | The internal database ID of a user document
-name | Name given by the user<br>
+
+- `_id (objectId)`: The unique ID of the user.
+- `username (string)`: The unique username of the user.
+  - This is the WatIAM username. For example, if your UW email address is `notmylover@uwaterloo.ca` then your WatIAM username is `notmylover`.
+- `name (string)`: The real full name provided by the user.
+  - This is meant to be the display name of the user. The user is free to change this at most once every 6 months.
+  - This is not guaranteed to be the actual legal name of the user since we will not do any verification.
+  - There are restrictions on the name:
+    - Maximum length is 64 characters.
+    - Minimum length is 2 characters.
+    - Only characters that matches `[A-Za-z .,\'-]` are allowed.
+    - Adjacent special characters that matches `[ .,\'-]` are not allowed. Meaning there must be at least one letter between two special characters.
+    - It must starts with a letter and cannot end with a space.
+  - Contact us for any exceptions.
+- `avatar_url (string)`: The link to the avatar.
+- `faculty (string)`: The faculty the user is enrolled in. It is validated by the backend to ensure validity. Refer to [Faculty and Program]() for more details.
+- `program (string)`: The program the user is enrolled in. It is validated against `faculty` to ensure validity. Refer to [Faculty and Program]() for more details.
+- `is_verified (boolean)`: Whether the user's UWaterloo email is verified.
+- `favourite_courses ([Course])`: An array `Course` items that the user favourited. Refer to [Course]() for more details.
+- `taken_courses (Term.term_id => {Term.year, Term.season, [Course]})`: This maps IDs of `Term` items to arrays of `Course` items. n array of IDs of `Course` items that the user favourited. When populated, this field will yield `[Course]`. Refer to [Course]() for more details.
+
 
 ## Get All Users
 
