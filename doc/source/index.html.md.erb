@@ -9,6 +9,7 @@ toc_footers:
   - <a href='https://github.com/lord/slate'>Documentation Powered by Slate</a>
 
 includes:
+  - users
   - errors
 
 search: true
@@ -22,215 +23,52 @@ This example API documentation page was created with [Slate](https://github.com/
 
 # Authentication
 
+## API Key
+
 > To authorize, set the HTTP request header X-API-KEY to your API key:
 
 ```shell
 curl <api_end_point>
-  --header "X-API-KEY: api_key"
+  -H "X-API-KEY: api_key"
 ```
 
 > Make sure to replace `api_key` with the actual API key.
 
-UWCourse API uses API keys to allow access to the API. For now, we don't plan to distribute any API key.
+UWCourse API uses API keys to allow access to all endpoints of the API. For now, we don't plan to distribute any API key.
 
-UWCourse expects for the API key to be included in all API requests to the server in a header that looks like the following:
+UWCourse API expects for the API key to be included in all API requests to the server the header `X-API-KEY`.
 
-`X-API-KEY: api_key`
+The API will return 403: Unauthorized if the API Key is missing/invalid.
 
-<aside class="notice">
-You must replace <code>api_key</code> with the actual API key.
-</aside>
+## User Token
 
-# Users
-
-## Model
-
-> Example of a user JSON document:
-
-```json
-{
-  "_id": "5d2eb0c88131a99cb3d6decb",
-  "username": "notmylover",
-  "name": "Billy Jeans",
-  "avatar_url": "<%= config[:domain] %>/pictures/avatar.jpg",
-  "faculty": "Mathematics",
-  "program": "Computer Science",
-  "is_verified": true,
-  "favourite_courses": [],
-  "taken_courses": [],
-  "views": 13,
-  "created_at": "2019-07-17T05:32:54.938Z",
-  "updated_at": "2019-07-17T05:32:54.938Z",
-  "last_login_at": "2019-07-17T05:32:54.938Z"
-}
-```
-
-The list of fields below illustrates how the publicly exposed User model is defined:
-
-
-- `_id (objectId)`: The unique ID of the user.
-- `username (string)`: The unique username of the user.
-  - This is the WatIAM username. For example, if your UW email address is `notmylover@uwaterloo.ca` then your WatIAM username is `notmylover`.
-- `name (string)`: The real full name provided by the user.
-  - This is meant to be the display name of the user. The user is free to change this at most once every 6 months.
-  - This is not guaranteed to be the actual legal name of the user since we will not do any verification.
-  - There are restrictions on the name:
-    - Maximum length is 64 characters.
-    - Minimum length is 2 characters.
-    - Only characters that matches `[A-Za-z .,\'-]` are allowed.
-    - Adjacent special characters that matches `[ .,\'-]` are not allowed. Meaning there must be at least one letter between two special characters.
-    - It must starts with a letter and cannot end with a space.
-  - Contact us for any exceptions.
-- `avatar_url (string)`: The link to the avatar.
-- `faculty (string)`: The faculty the user is enrolled in. It is validated by the backend to ensure validity. Refer to [Faculty and Program]() for more details.
-- `program (string)`: The program the user is enrolled in. It is validated against `faculty` to ensure validity. Refer to [Faculty and Program]() for more details.
-- `is_verified (boolean)`: Whether the user's UWaterloo email is verified.
-- `favourite_courses ([Course])`: An array `Course` items that the user favourited. Refer to [Course]() for more details.
-- `taken_courses (Term.term_id => {Term.year, Term.season, [Course]})`: This maps IDs of `Term` items to arrays of `Course` items. n array of IDs of `Course` items that the user favourited. When populated, this field will yield `[Course]`. Refer to [Course]() for more details.
-
-
-## Get All Users
+> To authorize, set the HTTP request header X-WAUTH to the JWT associated with the user:
 
 ```shell
-curl "<%= config[:domain] %>/<%= config[:api_v] %>/users"
-  -H "Authorization: api_key"
+curl <api_end_point>
+  -H "X-WAUTH: token_string"
 ```
 
-> The above command returns JSON structured like this:
+> Make sure to replace `token_string` with the actual JWT token.
 
-```json
-[
-  {
-    "_id": "5d2eb0c88131a99cb3d6decb",
-    "name": "Billy Jeans",
-    "username": "notmylover"
-  },
-  {
-    "id": "5d2eb0d4ff5bf8664a59ac2b",
-    "name": "Peter Parker",
-    "username": "spiderman"
-  }
-]
+UWCourse API uses JWT token to fetch and modify certain private user's information.
+The token can be generated through the [Sign in]() endpoint.
+Once a token is generated, it is valid for 3 hours.
+A token can be invalidated prematurely if there are suspicious activity or the user changed their password.
+
+This documentation will specify clearly if an endpoint operation requires a JWT user token.
+
+The UWCourse API expects the token when required to be stored as the header `X-WAUTH`.
+
+The API will return a 403: Unauthorized if the token is missing or invalid.
+
+# Timestamp
+
+> Example of a timestamp string representing 15:51:26 on July 21st, 2019 in EDT timezone:
+
+```
+2019-07-21T19:51:26+00:00
 ```
 
-This endpoint retrieves all users with minimal details.
-
-### HTTP Request
-
-`GET <%= config[:domain] %>/<%= config[:api_v] %>/kittens`
-
-### Query Parameters
-
-Parameter | Default | Description
---------- | ------- | -----------
-include_cats | false | If set to true, the result will also include cats.
-available | true | If set to false, the result will include kittens that have already been adopted.
-
-<aside class="success">
-Remember — a happy kitten is an authenticated kitten!
-</aside>
-
-## Get a Specific Kitten
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get(2)
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get(2)
-```
-
-```shell
-curl "http://example.com/api/kittens/2"
-  -H "Authorization: meowmeowmeow"
-```
-
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-let max = api.kittens.get(2);
-```
-
-> The above command returns JSON structured like this:
-
-```json
-{
-  "id": 2,
-  "name": "Max",
-  "breed": "unknown",
-  "fluffiness": 5,
-  "cuteness": 10
-}
-```
-
-This endpoint retrieves a specific kitten.
-
-<aside class="warning">Inside HTML code blocks like this one, you can't use Markdown, so use <code>&lt;code&gt;</code> blocks to denote code.</aside>
-
-### HTTP Request
-
-`GET http://example.com/kittens/<ID>`
-
-### URL Parameters
-
-Parameter | Description
---------- | -----------
-ID | The ID of the kitten to retrieve
-
-## Delete a Specific Kitten
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.delete(2)
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.delete(2)
-```
-
-```shell
-curl "http://example.com/api/kittens/2"
-  -X DELETE
-  -H "Authorization: meowmeowmeow"
-```
-
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-let max = api.kittens.delete(2);
-```
-
-> The above command returns JSON structured like this:
-
-```json
-{
-  "id": 2,
-  "deleted" : ":("
-}
-```
-
-This endpoint deletes a specific kitten.
-
-### HTTP Request
-
-`DELETE http://example.com/kittens/<ID>`
-
-### URL Parameters
-
-Parameter | Description
---------- | -----------
-ID | The ID of the kitten to delete
-
+Many models do carry the information about when the documents were created and updated.
+All these timestamp uses the MongoDB's [ISODate](https://docs.mongodb.com/manual/reference/method/Date/) format (in UTC timezone).

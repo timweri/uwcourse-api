@@ -1,0 +1,306 @@
+# Users
+
+## User Model
+
+> Example of a user JSON document:
+
+```json
+{
+  "_id": "5d2eb0c88131a99cb3d6decb",
+  "username": "notmylover",
+  "name": "Billy Jeans",
+  "avatar_url": "<%= config[:domain] %>/pictures/avatar.jpg",
+  "faculty": "Mathematics",
+  "program": "Computer Science",
+  "is_verified": true,
+  "favourite_courses": [...],
+  "taken_courses": {...},
+  "views": 13,
+  "created_at": "2019-07-17T05:32:54.938Z",
+  "updated_at": "2019-07-17T05:32:54.938Z",
+  "last_login_at": "2019-07-17T05:32:54.938Z"
+}
+```
+
+> Property `favourite_courses` is structured as so:
+
+```json
+[
+  {
+    "subject": "CS",
+    "catalog_number": "135",
+    "liked_rating": {...},
+  },
+]
+```
+
+> Property `taken_courses` is structured as so:
+
+```json
+{
+  "1195": {
+    "year": 2019,
+    "season": "Spring",
+    "courses": [
+      {
+        "subject": "CS",
+        "catalog_number": "135",
+        "liked_rating": {...},
+      },
+    ]
+  },
+},
+```
+
+The list of fields below illustrates how the publicly exposed User model is defined:
+
+
+- `_id (objectId)`: The unique ID of the user.
+- `username (string)`: The unique username of the user.
+  - This is the WatIAM username. For example, if your UW email address is `notmylover@uwaterloo.ca` then your WatIAM username is `notmylover`.
+- `name (string)`: The real full name provided by the user.
+  - This is meant to be the display name of the user. The user is free to change this at most once every 6 months.
+  - This is not guaranteed to be the actual legal name of the user since we will not do any verification.
+  - There are restrictions on the name:
+    - Maximum length is 64 characters.
+    - Minimum length is 2 characters.
+    - Only characters that matches `[A-Za-z .,\'-]` are allowed.
+    - Adjacent special characters that matches `[ .,\'-]` are not allowed. Meaning there must be at least one letter between two special characters.
+    - It must starts with a letter and cannot end with a space.
+  - Contact us for any exceptions.
+- `avatar_url (string)`: The link to the avatar.
+- `faculty (string)`: The faculty the user is enrolled in. It is validated by the backend to ensure validity. Refer to [Faculty and Program]() for more details.
+- `program (string)`: The program the user is enrolled in. It is validated against `faculty` to ensure validity. Refer to [Faculty and Program]() for more details.
+- `is_verified (boolean)`: Whether the user's UWaterloo email is verified.
+- `favourite_courses ([Course])`: An array `Course` items that the user favourited. Refer to [Course]() for more details.
+- `taken_courses (Term.term_id => {Term.year, Term.season, [Course]})`: This maps IDs of `Term` items to arrays of `Course` items. An array of IDs of `Course` items that the user favourited. When populated, this field will yield `[Course]`. Refer to [Course]() for more details.
+- `created_at (Timestamp)`
+- `updated_at (Timestamp)`
+- `last_login_at (Timestamp)`
+
+## Get All Users
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/users"
+  -H "X-API-KEY: api_key"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+[
+  {
+    "_id": "5d2eb0c88131a99cb3d6decb",
+    "name": "Billy Jeans",
+    "username": "notmylover"
+  },
+  {
+    "_id": "5d2eb0d4ff5bf8664a59ac2b",
+    "name": "Peter Parker",
+    "username": "spiderman"
+  }
+]
+```
+
+This endpoint retrieves all users with minimal details.
+
+### HTTP Request
+
+`GET <%= config[:domain] %>/<%= config[:api_v] %>/users`
+
+### Query Parameters
+
+Parameter | Default | Description
+--------- | ------- | -----------
+limit | 20 | Amount of users to return.
+offset | 0 | The offset of the first user
+
+## Get a Specific User
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/notmylover"
+  -H "X-API-KEY: api_key"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "_id": "5d2eb0c88131a99cb3d6decb",
+  "username": "notmylover",
+  "name": "Billy Jeans",
+  "avatar_url": "<%= config[:domain] %>/pictures/avatar.jpg",
+  "faculty": "Mathematics",
+  "program": "Computer Science",
+  "is_verified": true,
+  "favourite_courses": [...],
+  "taken_courses": {...},
+  "views": 13,
+  "created_at": "2019-07-17T05:32:54.938Z",
+  "updated_at": "2019-07-17T05:32:54.938Z",
+  "last_login_at": "2019-07-17T05:32:54.938Z"
+}
+```
+
+This endpoint retrieves a specific user by username.
+
+### HTTP Request
+
+`GET <%= config[:domain] %>/<%= config[:api_v] %>/users/:username`
+
+### URL Parameters
+
+Parameter | Description
+--------- | -----------
+username | The unique WatIAM username of the user to retrieve
+
+### Query Parameters
+
+Parameter | Default | Description
+--------- | ------- | -----------
+fields | all | List of fields from the [User Model](#user-model) to return.
+
+## Modify a Specific User
+
+<aside class="notice">
+This operation requires the <a href="#user-token"><code>X-WAUTH</code></a> authentication header.
+</aside>
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/notmylover"
+  -H "X-API-KEY: api_key"
+  -H "X-WAUTH: token_string"
+  -H "Content-Type: application/json"
+  -X POST --data '<json_body>'
+```
+
+> Example of `json_body`:
+
+```json
+{
+  "name": "New Name",
+  "faculty": "Arts",
+  "program": "English",
+  "avatar_url": "kirby.jpg",
+  "favourite_courses": {
+    "$add": [
+      {
+        "subject": "CS",
+        "catalog_number": "145"
+      }
+    ],
+    "$remove": [
+      {
+        "subject": "MATH",
+        "catalog_number": "128"
+      }
+    ]
+  },
+  "taken_courses": {
+    "$add": {
+      "1195": [
+        {
+          "subject": "CO",
+          "catalog_number": "250"
+        }
+      ]
+    },
+    "$remove": {
+      "1195": [
+        {
+          "subject": "EMLS",
+          "catalog_number": "101R"
+        }
+      ]
+    }
+  }
+}
+```
+
+This endpoint modifies the information of a specific user, identified by username.
+
+### HTTP Request
+
+`POST <%= config[:domain] %>/<%= config[:api_v] %>/users/:username`
+
+### URL Parameters
+
+Parameter | Description
+--------- | -----------
+username | The unique WatIAM username of the user to modify
+
+### Request Body & Header
+
+The request body must be a JSON and the header `Content-Type` must be `application/json`.
+
+The request body, as shown in the example, maps a property name of the [User Model] to a new value.
+The user that is referred to by the URL parameter `username` will have their corresponding fields set to these new values.
+The server will validate all these changes.
+If validation fails for any field, the server will return a [400 Bad Request](#400-bad-request) containing the description of the error.
+
+Since `favourite_courses` maps to an array and `taken_courses` maps to a map, the request body syntax to modify these
+fields need to be clearly defined.
+The syntax is defined similarly to MongoDB's:
+
+#### `favourite_courses`
+
+> Example of the request body used to modify `favourite_courses`:
+
+```json
+{
+  "favourite_courses": {
+    "$add": [
+      {
+        "subject": "CS",
+        "catalog_number": "145"
+      }
+    ],
+    "$remove": [
+      {
+        "subject": "MATH",
+        "catalog_number": "128"
+      }
+    ]
+  }
+}
+```
+
+This will be an object containing two optional fields:
+- `$add`: an array of courses to add. Each item of the array contains two required fields used to identify the course:
+  - "subject"
+  - "catalog_number"
+- `$remove`: an array of courses to remove. Each item of the array contains two required fields used to identify the course:
+  - "subject"
+  - "catalog_number"
+
+
+
+## Delete a Specific Kitten
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/:username"
+  -X DELETE
+  -H "X-API-KEY: api_key"
+  -H "X-WAUTH: token"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "id": 2,
+  "deleted" : ":("
+}
+```
+
+This endpoint deletes a specific kitten.
+
+### HTTP Request
+
+`DELETE http://example.com/kittens/<ID>`
+
+### URL Parameters
+
+Parameter | Description
+--------- | -----------
+ID | The ID of the kitten to delete
