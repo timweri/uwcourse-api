@@ -38,7 +38,7 @@ UWCourse API uses API keys to allow access to all endpoints of the API. For now,
 
 UWCourse API expects for the API key to be included in all API requests to the server the header `X-API-KEY`.
 
-The API will return 403: Unauthorized if the API Key is missing/invalid.
+The API will return `403: Unauthorized` if the API Key is missing/invalid.
 
 ## User Token
 
@@ -60,14 +60,14 @@ This documentation will specify clearly if an endpoint operation requires a JWT 
 
 The UWCourse API expects the token when required to be stored as the header `X-WAUTH`.
 
-The API will return a 403: Unauthorized if the token is missing or invalid.
+The API will return a `403: Unauthorized` if the token is missing or invalid.
 
 # Timestamp
 
 > Example of a timestamp string representing 15:51:26 on July 21st, 2019 in EDT timezone:
 
 ```
-2019-07-21T19:51:26+00:00
+2019-07-21T19:51:26Z
 ```
 
 Many models do carry the information about when the documents were created and updated.
