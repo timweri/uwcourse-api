@@ -1,0 +1,82 @@
+# Courses
+
+## Course Model
+
+> Example of a Course JSON document:
+
+```json
+{
+  "id": "5d2eb0c88131a99cb3d6decb",
+  "title": "Data Structures and Data Management (Enriched)",
+  "subject": "CS",
+  "catalog_number": "240E",
+  "url": "",
+  "course_id": "",
+  "units": 0.5,
+  "description": "Enriched version of CS 240.",
+  "academic_level": "",
+  "instructions": [],
+  "prerequisites": "",
+  "antirequisites": "",
+  "corequisites": "",
+  "crosslistings": "",
+  ""
+  "easy_rating": {
+
+  },
+  "year": 2019,
+  "season": "Spring",
+  "created_at": "2019-07-17T05:32:54.938Z",
+  "updated_at": "2019-07-17T05:32:54.938Z"
+}
+```
+
+The list of fields below illustrates how the publicly exposed Term model is defined:
+
+
+- `id (objectId)`: The unique ID of the term.
+- `term_id (string)`: The unique ID of the term assigned by UWaterloo.
+- `year (Number)`: The year of the term.
+- `season (string)`: The season of the term and is one of `Spring`, `Fall` and `Winter`.
+- `created_at (Timestamp)`
+- `updated_at (Timestamp)`
+
+## Get a Course
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/courses/:id"
+  -H "X-API-KEY: api_key"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+[
+  {
+    "id": "5d2eb0c88131a99cb3d6decb",
+    "name": "Billy Jeans",
+    "username": "notmylover"
+  },
+  {
+    "id": "5d2eb0d4ff5bf8664a59ac2b",
+    "name": "Peter Parker",
+    "username": "spiderman"
+  }
+]
+```
+
+Fetch a course by ID.
+
+### HTTP Request
+
+`GET <%= config[:domain] %>/<%= config[:api_v] %>/courses/:id`
+
+### URL Parameters
+
+Parameter | Description
+--------- | -----------
+id | The unique ID of the course to fetch.
+
+### Response
+
+If successful, returns `200: OK` with a JSON body structured like as shown in the example.

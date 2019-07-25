@@ -6,7 +6,7 @@
 
 ```json
 {
-  "_id": "5d2eb0c88131a99cb3d6decb",
+  "id": "5d2eb0c88131a99cb3d6decb",
   "username": "notmylover",
   "name": "Billy Jeans",
   "avatar_url": "<%= config[:domain] %>/pictures/avatar.jpg",
@@ -55,7 +55,7 @@
 The list of fields below illustrates how the publicly exposed User model is defined:
 
 
-- `_id (objectId)`: The unique ID of the user.
+- `id (objectId)`: The unique ID of the user.
 - `username (string)`: The unique username of the user.
   - This is the WatIAM username. For example, if your UW email address is `notmylover@uwaterloo.ca` then your WatIAM username is `notmylover`.
 - `name (string)`: The real full name provided by the user.
@@ -86,7 +86,7 @@ curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/username"
   -X POST
 ```
 
-Creates a new user in the database. 
+Creates a new user in the database.
 However, this user is marked as unverified and is only visible through verification-related endpoints.
 
 Verification is done through email.
@@ -116,7 +116,7 @@ curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/username/verification?v
   -X PUT
 ```
 
-Creates a new user in the database. 
+Creates a new user in the database.
 However, this user is marked as unverified and is only visible through verification-related endpoints.
 Verification is done through email.
 Refer to [Verify User]() for how to verify the user.
@@ -148,12 +148,12 @@ curl "<%= config[:domain] %>/<%= config[:api_v] %>/users"
 ```json
 [
   {
-    "_id": "5d2eb0c88131a99cb3d6decb",
+    "id": "5d2eb0c88131a99cb3d6decb",
     "name": "Billy Jeans",
     "username": "notmylover"
   },
   {
-    "_id": "5d2eb0d4ff5bf8664a59ac2b",
+    "id": "5d2eb0d4ff5bf8664a59ac2b",
     "name": "Peter Parker",
     "username": "spiderman"
   }
@@ -180,7 +180,7 @@ If successful, returns `200: OK` with a JSON body structured like as shown in th
 ## Get a User
 
 ```shell
-curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/username"
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/5d2eb0c88131a99cb3d6decb"
   -H "X-API-KEY: api_key"
 ```
 
@@ -188,7 +188,7 @@ curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/username"
 
 ```json
 {
-  "_id": "5d2eb0c88131a99cb3d6decb",
+  "id": "5d2eb0c88131a99cb3d6decb",
   "username": "notmylover",
   "name": "Billy Jeans",
   "avatar_url": "<%= config[:domain] %>/pictures/avatar.jpg",
@@ -204,17 +204,17 @@ curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/username"
 }
 ```
 
-This endpoint retrieves a specific user by username.
+This endpoint retrieves a specific user by ID.
 
 ### HTTP Request
 
-`GET <%= config[:domain] %>/<%= config[:api_v] %>/users/:username`
+`GET <%= config[:domain] %>/<%= config[:api_v] %>/users/:id`
 
 ### URL Parameters
 
 Parameter | Description
 --------- | -----------
-username | The unique WatIAM username of the user to retrieve
+id | The unique ID of the user to retrieve
 
 ### Query Parameters
 
@@ -233,7 +233,7 @@ This operation requires the <a href="#user-token"><code>X-WAUTH</code></a> authe
 </aside>
 
 ```shell
-curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/username"
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/5d2eb0c88131a99cb3d6decb"
   -H "X-API-KEY: api_key"
   -H "X-WAUTH: token_string"
   -H "Content-Type: application/json"
@@ -275,17 +275,17 @@ curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/username"
 }
 ```
 
-This endpoint modifies the information of a specific user, identified by username.
+This endpoint modifies the information of a specific user, identified by ID.
 
 ### HTTP Request
 
-`PUT <%= config[:domain] %>/<%= config[:api_v] %>/users/:username`
+`POST <%= config[:domain] %>/<%= config[:api_v] %>/users/:id`
 
 ### URL Parameters
 
 Parameter | Description
 --------- | -----------
-username | The unique WatIAM username of the user to modify
+id | The unique ID of the user to modify
 
 ### Request Body & Header
 
@@ -310,7 +310,7 @@ This will be an object containing two optional fields:
 - `$remove ([])`: an array of courses to remove. Each item of the array contains two required fields used to identify the course:
   - "subject"
   - "catalog_number"
-  
+
 #### `taken_courses`
 
 This will be an map (object) mapping a [`Term.term_id`](#term) to an object containing two optional fields:
@@ -321,11 +321,11 @@ This will be an map (object) mapping a [`Term.term_id`](#term) to an object cont
 - `$remove ([])`: an array of courses to remove from the selected Term. Each item of the array contains two required fields used to identify the course:
   - "subject"
   - "catalog_number"
- 
+
 ### Response
 
 If successful, returns `200: OK`.
-  
+
 ## Modify a User's Password
 
 <aside class="notice">
@@ -333,7 +333,7 @@ This operation requires the <a href="#user-token"><code>X-WAUTH</code></a> authe
 </aside>
 
 ```shell
-curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/username/password"
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/:id/password"
   -H "X-API-KEY: api_key"
   -H "X-WAUTH: token_string"
   -H "Content-Type: application/json"
@@ -353,7 +353,7 @@ This endpoint modifies the password of a specific user, identified by username.
 
 ### HTTP Request
 
-`PUT <%= config[:domain] %>/<%= config[:api_v] %>/users/:username/password`
+`PUT <%= config[:domain] %>/<%= config[:api_v] %>/users/:id/password`
 
 ### URL Parameters
 
@@ -370,10 +370,10 @@ The request body is an object containing two required fields:
 - `old_password (string)`:
   - The current password of the user.
   - The API returns `403: Unauthorized` if this field is missing or invalid.
-- `new_password (string)`: 
+- `new_password (string)`:
   - The new password the user want to change to.
   - The API returns `400: Bad Request` if this field is missing or invalid.
-  
+
 ### Response
 
 If successful, returns `200: OK`.
@@ -385,7 +385,7 @@ This operation requires the <a href="#user-token"><code>X-WAUTH</code></a> authe
 </aside>
 
 ```shell
-curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/username"
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/5d2eb0c88131a99cb3d6decb"
   -X DELETE
   -H "X-API-KEY: api_key"
   -H "X-WAUTH: token_string"
@@ -404,13 +404,13 @@ This endpoint deletes a specific kitten.
 
 ### HTTP Request
 
-`DELETE <%= config[:domain] %>/<%= config[:api_v] %>/users/:username`
+`DELETE <%= config[:domain] %>/<%= config[:api_v] %>/users/:id`
 
 ### URL Parameters
 
 Parameter | Description
 --------- | -----------
-username | The username of the user to delete
+id | The ID of the user to delete
 
 ### Request Body & Header
 
