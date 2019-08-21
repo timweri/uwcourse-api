@@ -58,5 +58,16 @@ services:
       - "4567:4567"
     volumes:
       - ./doc:/app/doc
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile-frontend
+    container_name: uwcourse-frontend
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./frontend:/app/frontend
+    environment:
+      - CHOKIDAR_USEPOLLING=true
 volumes:
   mongodata:

@@ -1,0 +1,22 @@
+FROM node:10-alpine
+MAINTAINER Duc Thanh Nguyen (ng.duc.tahn@gmail.com)
+
+# Expose port 8080
+EXPOSE 8080
+
+# Install npm packages
+RUN npm i -g @vue/cli
+WORKDIR /app
+COPY ./frontend/package.json /app/package.json
+RUN npm i
+ENV PATH /app/node_modules/.bin:$PATH
+
+# Set environment
+ENV NODE_ENV development
+ENV APP_ROOT_PATH /app/frontend
+
+# Select Working Directory
+WORKDIR /app/frontend
+
+# Start the API
+CMD ["npm", "run", "serve"]

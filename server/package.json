@@ -1,7 +1,7 @@
 {
   "name": "uwcourseapi",
   "version": "0.0.1",
-  "description": "A backend API for UWcourse",
+  "description": "The backend API for UWCourse",
   "main": "server.js",
   "dependencies": {
     "app-root-path": "^2.2.1",
