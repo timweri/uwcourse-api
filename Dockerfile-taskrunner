@@ -1,0 +1,19 @@
+FROM node:10.15-alpine
+MAINTAINER Duc Thanh Nguyen (ng.duc.tahn@gmail.com)
+
+# Install npm packages
+RUN npm i -g nodemon
+WORKDIR /app
+COPY ./taskrunner/package.json /app/package.json
+RUN npm i
+ENV PATH /app/node_modules/.bin:$PATH
+
+# Set environment
+ENV NODE_ENV dev
+ENV APP_ROOT_PATH /app/taskrunner
+
+# Select Working Directory
+WORKDIR /app/taskrunner
+
+# Start the taskrunner
+CMD nodemon --ignore uwopendata/data -L start.js

@@ -1,0 +1,514 @@
+# Users
+
+## User Model
+
+> Example of a user JSON document:
+
+```json
+{
+  "id": "5d2eb0c88131a99cb3d6decb",
+  "username": "notmylover",
+  "name": "Billy Jeans",
+  "avatar_url": "<%= config[:domain] %>/pictures/avatar.jpg",
+  "faculty": "Mathematics",
+  "program": "Computer Science",
+  "bookmark_courses": [],
+  "taken_courses": {},
+  "liked_courses": [],
+  "views": 13,
+  "created_at": "2019-07-17T05:32:54.938Z",
+  "updated_at": "2019-07-17T05:32:54.938Z",
+  "last_login_at": "2019-07-17T05:32:54.938Z"
+}
+```
+
+> Property `taken_courses` is structured as so:
+
+```json
+{
+  "5d2eb0c88131a99cb3d6decb": {
+    "uw_term_id": "1195",
+    "year": 2019,
+    "season": "Spring",
+    "courses": [
+      {
+        "subject": "CS",
+        "catalog_number": "135",
+        "liked_rating": {}
+      }
+    ]
+  }
+}
+```
+
+The list of fields below illustrates how the publicly exposed User model is defined:
+
+- `_id (objectId)`: The unique ID of the user.
+- `username (string)`: The unique username of the user.
+  - This is the WatIAM username. For example, if your UW email address is `notmylover@uwaterloo.ca` then your WatIAM username is `notmylover`.
+- `name (string)`: The display name provided by the user.
+  - This is meant to be the display name of the user. The user is free to change this at most once every 6 months.
+  - There are restrictions on the name:
+    - Maximum length is 32 characters.
+    - Minimum length is 2 characters.
+    - Matches `^[A-Za-z,. \'-]+$`.
+  - Contact us for any exceptions.
+- `password (string)`: The password of the user.
+- `avatar_url (string)`: The link to the avatar.
+- `faculty (string)`: The faculty the user is enrolled in. It is validated by the backend to ensure validity. Refer to [Faculty and Program](#faculty-and-program) for more details.
+- `program (string)`: The program the user is enrolled in. It is validated against `faculty` to ensure validity. Refer to [Faculty and Program](#faculty-and-program) for more details.
+- `bookmark_courses ([Course,_id])`: An array `Course` items that the user bookmarked. Refer to [Course Model](#course-model) for more details.
+- `taken_courses (Term._id => {Term.uw_term_id, Term.year, Term.season, [Course]})`: This maps IDs of `Term` items to arrays of `Course` items. An array of IDs of `Course` items that the user bookmarked. When populated, this field will yield `[Course]`. Refer to [Course Model](#course-model) for more details.
+- `liked_courses ([LikeDislike])`: The array of Like Dislike items. Each item has the following fields:
+    - `course_id (Course._id)`: ID of the course liked or disliked.
+    - `value (integer)`: `-1` means disliked. `1` means liked.
+- `created_at (Timestamp)`
+- `updated_at (Timestamp)`
+- `last_login_at (Timestamp)`
+
+Sensitive fields like `password` will never be returned by any endpoint.
+
+### Faculty and Program
+
+This is a list of all valid combinations of Faculty and Program: [https://uwaterloo.ca/future-students/programs-faculty]().
+
+## Registration Flow
+
+- User signs up through the client with just their username.
+- Client sends [Send Confirmation Email](#send-confirmation-email) request to the backend server.
+- The backend server emails the user (using the Waterloo email derived from the username) with the confirmation link containing the confirmation code pointing to the client.
+The link expires in 24h.
+- The client asks for the username of the user and checks the confirmation code using [Verify Confirmation Code](#verify-confirmation-code):
+    - If invalid, shows Unauthorized error page.
+    - If valid, go to next step.
+- The client starts the registration process, showing a form of compulsory and optional fields for the user to fill in.
+- The user fills in all the compulsory fields (most importantly the password).
+- The client send a request to verify the user using [Create a User](#create-a-user).
+- Registration of the user is done.
+
+## Send Confirmation Email
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/verification?username=notmylover&type=REGISTRATION"
+  -H "X-API-KEY: api_key"
+  -X POST
+```
+
+A verification email is then sent to the user containing the link and instructions to register.
+The email is deduced by appending "@uwaterloo.ca" at the end.
+
+### HTTP Request
+
+`POST <%= config[:domain] %>/<%= config[:api_v] %>/users/registration/verification`
+
+### Query Parameters
+
+Parameter | Description
+--------- | -----------
+username | The username to register.
+type | Type of confirmation code to send.
+
+### Response
+
+If successful, returns `200: OK`.<br/>
+
+## Verify Confirmation Code
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/verification?confirmation_code=confirmation_code&username=username&type=REGISTRATION"
+  -H "X-API-KEY: api_key"
+```
+
+Used to verify if the token matches the username and type, and if the token is still valid.
+
+### HTTP Request
+
+`GET <%= config[:domain] %>/<%= config[:api_v] %>/users/verification`
+
+### Query Parameters
+
+Parameter | Description
+--------- | -----------
+username | The username corresponding to the code.
+confirmation_code | The confirmation code.
+type | Type of confirmation code.
+
+### Response
+
+If successful, returns `204: No Content`.<br//
+If the code has expired or the username doesn't match the code, returns `404: Not Found`.
+
+## Create a User
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/users?confirmation_code=confirmation_code&username=username"
+  -H "X-API-KEY: api_key"
+  -X POST --data "json_body"
+```
+
+> Example of `json_body`:
+
+```json
+{
+  "name": "Full Name",
+  "password": "password",
+  "faculty": "Mathematics",
+  "program": "Computer Science"
+}
+```
+
+Creates a verified user in the database with the mandatory fields that a verified user must have.
+Consumes a Confirmation Code of type `REGISTRATION` issued by [Send Confirmation Email](#send-confirmation-email).
+
+### HTTP Request
+
+`POST <%= config[:domain] %>/<%= config[:api_v] %>/users`
+
+### Query Parameters
+
+Parameter | Description
+--------- | -----------
+username | The username corresponding to the code.
+confirmation_code | The confirmation code of type `REGISTRATION`.
+
+### Request Body
+
+The request body must be a JSON and the header `Content-Type` must be `application/json`.
+
+The request body, as shown in the example, maps a property name of the [User Model](#user-model) to a new value.
+The server will validate all these changes.
+
+The allowed parameters include:
+
+- `name`*
+- `password`*
+- `faculty`*
+- `program`*
+
+*: Required
+
+### Response
+
+If successful, returns `200: OK` with a JSON body structured like as shown in the example.<br/>
+If validation fails for any field, the server will return a `400: Bad Request` containing the description of the error.<br/>
+If the user has already been created, returns `409: Conflict`.
+
+## Log In
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/tokens"
+  -H "X-API-KEY: api_key"
+  -X POST --data "json_body"
+```
+
+> Example of `json_body`:
+
+```json
+{
+  "username": "notmylover",
+  "password": "password"
+}
+```
+
+Creates a JWT authentication token for a user by supplying the username and password.
+The JWT token is required for a few operations.
+
+### HTTP Request
+
+`POST <%= config[:domain] %>/<%= config[:api_v] %>/users/tokens`
+
+### Request Body
+
+The request body must be a JSON and the header `Content-Type` must be `application/json`.
+
+The allowed parameters include:
+
+- `username`*
+- `password`*
+
+*: Required
+
+### Response
+
+If successful, returns `200: OK` with a JSON body structured like as shown in the example.<br/>
+If authentication fails, the server will return a `401: Unauthorized` containing the description of the error.
+
+## Get User By ID
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/:id"
+  -H "X-API-KEY: api_key"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "data": {
+    "id": "5d2eb0c88131a99cb3d6decb",
+    "username": "notmylover",
+    "name": "Billy Jeans",
+    "avatar_url": "<%= config[:domain] %>/pictures/avatar.jpg",
+    "faculty": "Mathematics",
+    "program": "Computer Science",
+    "bookmark_courses": [],
+    "taken_courses": {},
+    "views": 13,
+    "created_at": "2019-07-17T05:32:54.938Z",
+    "updated_at": "2019-07-17T05:32:54.938Z",
+    "last_login_at": "2019-07-17T05:32:54.938Z"
+  }
+}
+```
+
+This endpoint retrieves a specific user by ID.
+
+### HTTP Request
+
+`GET <%= config[:domain] %>/<%= config[:api_v] %>/users/:id`
+
+### URL Parameters
+
+Parameter | Description
+--------- | -----------
+id | The unique ID of the user to retrieve
+
+### Query Parameters
+
+Parameter | Default | Description
+--------- | ------- | -----------
+populate | [] | List of fields from the [User Model](#user-model) to populate.
+
+### Response
+
+If successful, returns `200: OK` with a JSON body structured like as shown in the example.
+
+## Get Self's Profile
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/self"
+  -H "X-API-KEY: api_key"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "data": {
+    "id": "5d2eb0c88131a99cb3d6decb",
+    "username": "notmylover",
+    "name": "Billy Jeans",
+    "avatar_url": "<%= config[:domain] %>/pictures/avatar.jpg",
+    "faculty": "Mathematics",
+    "program": "Computer Science",
+    "bookmark_courses": [],
+    "taken_courses": {},
+    "liked_courses": [],
+    "views": 13,
+    "created_at": "2019-07-17T05:32:54.938Z",
+    "updated_at": "2019-07-17T05:32:54.938Z",
+    "last_login_at": "2019-07-17T05:32:54.938Z"
+  }
+}
+```
+
+This endpoint retrieves a specific user specified by the `X-WAUTH` header.
+
+### HTTP Request
+
+`GET <%= config[:domain] %>/<%= config[:api_v] %>/users/self`
+
+### Query Parameters
+
+Parameter | Default | Description
+--------- | ------- | -----------
+populate | | List of fields from the [User Model](#user-model) to populate.
+optional_fields | | List of optional fields to return. Optional fields include `liked_courses`.
+
+### Response
+
+If successful, returns `200: OK` with a JSON body structured like as shown in the example.
+
+## Modify Self's Profile
+
+<aside class="notice">
+This operation requires the <a href="#user-token"><code>X-WAUTH</code></a> authentication header.
+</aside>
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/self"
+  -H "X-API-KEY: api_key"
+  -H "X-WAUTH: token_string"
+  -H "Content-Type: application/json"
+  -X PUT --data "json_body"
+```
+
+> Example of `json_body`:
+
+```json
+{
+  "name": "New Name",
+  "faculty": "Arts",
+  "program": "English",
+  "avatar_url": "kirby.jpg",
+  "bookmark_courses": {
+    "$add": [{
+        "subject": "CS",
+        "catalog_number": "145"
+    }],
+    "$remove": [{
+        "subject": "MATH",
+        "catalog_number": "128"
+    }]
+  },
+  "taken_courses": {
+    "$add": {
+      "1195": [{
+          "subject": "CO",
+          "catalog_number": "250"
+      }]
+    },
+    "$remove": {
+      "1195": [{
+          "subject": "EMLS",
+          "catalog_number": "101R"
+      }]
+    }
+  }
+}
+```
+
+This endpoint modifies the information of self, identified by the authentication header `X-WAUTH`.
+
+### HTTP Request
+
+`PUT <%= config[:domain] %>/<%= config[:api_v] %>/users/self`
+
+### Request Body
+
+The request body must be a JSON and the header `Content-Type` must be `application/json`.
+
+The request body, as shown in the example, maps a property name of the [User Model](#user-model) to a new value.
+The user that is referred to by the URL parameter `username` will have their corresponding fields set to these new values.
+The server will validate all these changes.
+
+Since `bookmark_courses` maps to an array and `taken_courses` maps to a map, the request body syntax to modify these
+fields need to be clearly defined.
+The syntax is defined similarly to MongoDB's:
+
+#### `bookmark_courses`
+
+This will be an object containing two optional fields:
+
+- `$add ([Course.id])`: an array of courses to add. Each item of the array of [`Course.id`](#course-model) of the courses to be added.
+- `$remove ([Course.id])`: an array of courses to remove. Each item of the array of [`Course.id`](#course-model) of the courses to be removed.
+
+Note: `$add` operation is executed before `$remove`.
+
+#### `taken_courses`
+
+This will be an object containing two optional fields:
+
+- `$add (object)`: This is a mapping of [`Term.id`](#term-model) to an array of [`Course.id`](#course-model) to add to the selected Term. 
+- `$remove (object)`: This is a mapping of [`Term.id`](#term-model) to an array of [`Course.id`](#course-model) to remove from the selected Term. 
+
+Note: `$add` operation is executed before `$remove`.
+  
+### Response
+
+If successful, returns `204: No Content`.<br/>
+If validation fails for any field, the server will return a `400: Bad Request` containing the description of the error.
+
+## Modify Self's Password
+
+<aside class="notice">
+This operation requires the <a href="#user-token"><code>X-WAUTH</code></a> authentication header.
+</aside>
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/self/password"
+  -H "X-API-KEY: api_key"
+  -H "X-WAUTH: token_string"
+  -H "Content-Type: application/json"
+  -X PUT --data "json_body"
+```
+
+> Example of `json_body`:
+
+```json
+{
+  "old_password": "oldpassword",
+  "new_password": "newpassword"
+}
+```
+
+This endpoint modifies the password of self, identified by the authentication header `X-WAUTH`.
+
+### HTTP Request
+
+`PUT <%= config[:domain] %>/<%= config[:api_v] %>/users/self/password`
+
+### Request Body
+
+The request body must be a JSON and the header `Content-Type` must be `application/json`.
+
+The request body is an object containing two required fields:
+
+- `old_password (string)`:
+  - The current password of the user.
+  - The API returns `403: Unauthorized` if this field is missing or invalid.
+- `new_password (string)`:
+  - The new password the user want to change to.
+  - The API returns `400: Bad Request` if this field is missing or invalid.
+
+### Response
+
+If successful, returns `204: No Content`.
+
+## Delete Self
+
+<aside class="notice">
+This operation requires the <a href="#user-token"><code>X-WAUTH</code></a> authentication header.
+</aside>
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/users/self"
+  -X DELETE
+  -H "X-API-KEY: api_key"
+  -H "X-WAUTH: token_string"
+  -X DELETE --data "json_body"
+```
+
+> Example of `json_body`:
+
+```json
+{
+  "password": "password"
+}
+```
+
+This endpoint deletes a specific kitten.
+
+### HTTP Request
+
+`DELETE <%= config[:domain] %>/<%= config[:api_v] %>/users/:id`
+
+### URL Parameters
+
+Parameter | Description
+--------- | -----------
+id | The ID of the user to delete
+
+### Request Body
+
+The request body must be a JSON and the header `Content-Type` must be `application/json`.
+
+The request body is an object containing one required field:
+
+- `password (string)`:
+  - The current password of the user.
+  - The API returns `403: Unauthorized` if this field is missing or invalid.
+
+### Response
+
+If successful, returns `200: OK`.

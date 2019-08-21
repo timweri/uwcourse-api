@@ -1,0 +1,23 @@
+{
+  "name": "uwcourse-api",
+  "version": "1.0.0",
+  "description": "The backend API server.",
+  "main": "index.js",
+  "dependencies": {
+    "eslint": "^5.16.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/timweri/uwcourse-api.git"
+  },
+  "author": "Duc Thanh Nguyen",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/timweri/uwcourse-api/issues"
+  },
+  "homepage": "https://github.com/timweri/uwcourse-api#readme"
+}

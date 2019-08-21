@@ -1,0 +1,750 @@
+# Courses
+
+## Course Model
+
+> Example of a Course JSON document:
+
+```json
+{
+  "_id": "5d2eb0c88131a99cb3d6decb",
+  "subject": "PHYS",
+  "catalog_number": "234",
+  "uw_course_id": "007407",
+  "reviews": [],
+  "academic_level": "undergraduate",
+  "useful_rating": {
+    "value": 500,
+    "count": 100
+  },
+  "easy_rating": {
+    "value": 500,
+    "count": 100
+  },
+  "liked_rating": {
+    "value": 500,
+    "count": 1000
+  },
+  "like_dislike": [],
+  "latest_term": "5d2eb0c7a8b9a99cb3d6decb",
+  "latest_detail": "5d2eb0c7a8b9a99cb3d6decb",
+  "bookmark_count": 50,
+  "created_at": "2019-07-17T05:32:54.938Z",
+  "updated_at": "2019-07-17T05:32:54.938Z"
+}
+```
+
+The Course Model only describes the overall rating and reviews of a combination of `uw_course_id`, `subject` and `catalog_number`.
+
+Note:
+
+- When courses are crosslisted, they have the same `uw_course_id` but different combination of `subject` and `uw_catalog_number`.
+So `uw_course_id` is not unique.
+We thus need `subject` and `catalog_number` to uniquely identify a course.
+- Once any of `uw_course_id`, `subject` and `catalog_number`, we assume that it is no longer the same course and will generate a new document for it.
+
+The actual course detail might vary from term to term, therefore, for each course, there is one document in the [Course Detail Model](#course-detail-model) per term describing the actual details of the course for that particular term.
+
+The list of fields below illustrates how the publicly exposed Course Model is defined:
+
+- `_id (objectId)`: The unique ID of the course.
+- `subject (string)`: The subject acronym of the course.
+- `catalog_number (string)`: The catalog number of the course.
+- `uw_course_id (string)`: The course ID's assigned by Registrar.
+- `reviews ([Review.id])`: The array of IDs of reviews. The actual review can be queried separately using this ID
+to support lazy loading.
+- `academic_level (string)`: Undergraduate or graduate course classification. Possible values are `undergraduate` and `graduate`.
+- `useful_rating (OverallRating)`: The rating on how useful the course is.
+- `easy_rating (OverallRating)`: The rating on how easy the course is.
+- `liked_rating (OverallRating)`: The like and dislike information of the course.
+- `latest_term (Term.id)`: The ID of the latest Term when the course still has a detail.
+- `latest_detail (CourseDetail.id)`: The ID of the detail of the course in the latest term. Refer to [Course Detail Model](#course-detail-model).
+- `bookmark_count (integer)`: The number of users bookmarking this course.
+- `created_at (Timestamp)`
+- `updated_at (Timestamp)`
+
+## Course Detail Model
+
+> Example of a Course Detail JSON document:
+
+```json
+{
+  "_id": "5d2eb0c88131a99cb3d6decb",
+  "term_id": "5d2eb0c88131e88cb3d6decb",
+  "course_id": "5d2eb0c88131a99cb3d6decb",
+  "units": 0.5,
+  "title": "Quantum Physics 1",
+  "description": "Background of quantum physics. Introduction to formalism of quantum physics. Introduction to operators. Quantization, waves and particles. The uncertainty principle. The Schroedinger equation for one-dimensional problems: bound states in square wells. Harmonic oscillator; transmission through barriers.",
+  "instructions": ["LEC", "TUT"],
+  "prerequisites": "PHYS 112 or 122; MATH 114 or 136; MATH 128 or 138 or 148.",
+  "antirequisites": "CHEM 356, NE 232, PHYS 233, ECE 405",
+  "corequisites": "One of MATH 228, AMATH 250, AMATH 251.",
+  "crosslistings": null,
+  "terms_offered": ["W", "S"],
+  "url": "http://www.ucalendar.uwaterloo.ca/1819/COURSE/course-PHYS.html#PHYS234",
+  "offerings": {
+    "online": false,
+    "online_only": false,
+    "st_jerome": false,
+    "st_jerome_only": false,
+    "renison": false,
+    "renison_only": false,
+    "conrad_grebel": false,
+    "conrad_grebel_only": false
+  },
+  "needs_department_consent": false,
+  "needs_instructor_consent": false,
+  "notes": "[Note: PHYS 236 or knowledge of computational methods is recommended. Offered: W, S]",
+  "extra": [],
+  "schedule": [],
+  "created_at": "2019-07-17T05:32:54.938Z",
+  "updated_at": "2019-07-17T05:32:54.938Z"
+}
+```
+
+The Course Detail Model describes the details of a course for a given term. 
+
+The list of fields below illustrates how the publicly exposed Course Detail Model is defined:
+
+- `_id (objectID)`: The unique ID of the detail.
+- `term_id (Term.id)`: The ID of the term this course detail belongs to.
+- `course_id (Course.id)` The ID of the course this course detail belongs to.
+- `units (number)`: Credit count for the course.
+- `title (string)`: Class name and title
+- `description (string)`: Brief course description
+- `instructions ([string])`: Instruction types for the course (`LEC`, `TUT`, `LAB` etc).
+- `prerequisites (string)`: Prerequisite listing for the course.
+- `antirequisites (string)`: Antirequisite listing for the course.
+- `corequisites (string)`: Corequisite listing for the course.
+- `crosslistings (string)`: Crosslisted courses.
+- `terms_offered ([string])`: List of terms that the course is offered.
+- `url (string)`: Course URL on the course calendar of the current term.
+- `offerings (object)`: Information about offerings in colleges or online:
+    - `online (boolean)`: Is the course offered online.
+    - `online_only (boolean)`: Is the course only offered online.
+    - `st_jerome (boolean)`: Is the course offered at St. Jerome's.
+    - `st_jerome_only (boolean)`: Is the course only offered at St. Jerome's.
+    - `renison (boolean)`: Is the course offered at Renison.
+    - `renison_only (boolean)`: Is the course only offered at Renison.
+    - `conrad_grebel (boolean)`: Is the course offered at Conrad Grebel.
+    - `conrad_grebel_only (boolean)`: Is the course only offered at Conrad Grebel.
+- `needs_department_consent (boolean)`: If department consent is required for the course.
+- `needs_instructor_consent (boolean)`: If instructor consent is required for the course.
+- `notes (string)`: Additional notes on the course.
+- `extra ([string])`: Any additional information.
+- `schedule ([CourseSchedule])`: A list of class sections. Each one follows the [Course Schedule Model](#course-schedule-model).
+- `created_at (Timestamp)`
+- `updated_at (Timestamp)`
+
+## Course Schedule Model
+
+> Example of a Course Detail JSON document:
+
+```json
+{
+  "class_number": "4326",
+  "section": "TUT 102",
+  "campus": "UW U",
+  "enrollment_capacity": 42,
+  "enrollment_total": 40,
+  "waiting_capacity": 0,
+  "waiting_total": 0,
+  "note": "Choose TUT section for Related 1.",
+  "associated_class": 1,
+  "related_component_1": null,
+  "related_component_2": null,
+  "classes": [
+    {
+      "date": {
+        "start_time": "13:30",
+        "end_time": "14:20",
+        "weekdays": "M",
+        "start_date": null,
+        "end_date": null,
+        "is_tba": false,
+        "is_cancelled": false,
+        "is_closed": false
+      },
+      "location": {
+        "building": "QNC",
+        "room": "2501"
+      },
+      "instructors": [
+        "Budakian,Raffi"
+      ]
+    }
+  ],
+  "reserves": [
+    {
+      "reserve_group": "Exchange students",
+      "enrollment_capacity": 10,
+      "enrollment_total": 0
+    }
+  ],
+  "last_updated": "2019-07-17T05:32:54.938Z",
+  "updated_at": "2019-07-17T05:32:54.938Z"
+}
+```
+
+The Course Schedule Model describes the schedule of a course for a given term.
+The model is embedded within the [Course Detail Model](#course-detail-model) so there is no need for information on what course or term the schedule describes.
+
+The list of fields below illustrates how the publicly exposed Course Schedule Model is defined:
+
+- `class_number (string)`: Associated term specific class enrollment number.
+- `section (string)`: Class instruction and number.
+- `campus (string)`: Name of the campus the course is being offered.
+- `enrollment_capacity (number)`: Class enrollment capacity.
+- `enrollment_total (number)`: Total current class enrollment.
+- `waiting_capacity (number)`: Class waiting capacity.
+- `waiting_total (number)`: Total current waiting students.
+- `note (string)`: Additional notes regarding enrollment for the given term.
+- `associated_class (number)`: Associated class id.
+- `related_component_1 (string)`: Name of the first related course component.
+- `related_component_2 (string)`: Name of the second related course component.
+- `classes (object)`: Information about the date, time and instructor for the class:
+  - `date (object)`: Date information:
+    - `start_time (string)`: 24h class starting time.
+    - `end_time (string)`: 24h class ending time.
+    - `weekdays (string)`: Weekdays the course is offered.
+    - `start_date (string)`: Additional starting date for the course.
+    - `end_date (string)`: Additional ending date for the course.
+    - `is_tba (boolean)` If the course schedule is TBA.
+    - `is_cancelled (boolean)`: If the course schedule is cancelled for the term.
+    - `is_closed (boolean)`: If the course is closed for the term.
+  - `location (object)`: Location information:
+    - `building (string)`: Name of the building.
+    - `room (string)`: Room number from the building.
+  - `instructors ([String])`: Names of the instructors.
+- `reserves (object)`: Course specific enrollment reservation data:
+  - `reserve_group (string)`: Name of the reserved group.
+  - `enrollment_capacity (number)`: Total enrollment capacity of the group.
+  - `enrollment_total (number)`: Total reserve enrollment.
+- `last_updated (Timestamp)`: The last update on UW's server.
+- `updated_at (Timestamp)`: The last update on UWCourse server.
+
+## Course Review Model
+
+> Example of a Course Review JSON document:
+
+```json
+{
+  "_id": "5d2eb0c88131a99cb3d6decb",
+  "course_id": "5d2eb0c88131a99cb3d6decb",
+  "user_id": "5d2eb0c88131a99cb3d6decb",
+  "term_id": "5d2eb0c88131a99cb3d6decb",
+  "easy_rating": 5,
+  "useful_rating": 5,
+  "content": "CONTENT",
+  "created_at": "2019-07-17T05:32:54.938Z",
+  "updated_at": "2019-07-17T05:32:54.938Z"
+}
+```
+
+The Course Review Model describes a review given by a user to a course in a given term.
+
+The list of fields below illustrates how the publicly exposed Course Review Model is defined:
+
+- `_id (objectId)`: The unique ID of the course review.
+- `course_id (objectId)`: The ID of the course reviewed.
+- `user_id (objectId)`: The ID of the review's author.
+- `term_id (objectId)`: The ID of the term this review is for.
+to support lazy loading.
+- `useful_rating (Rating)`: The rating on how useful the course is. Is an integer between 0 and 5 (inclusive).
+- `easy_rating (Rating)`: The rating on how easy the course is. Is an integer between 0 and 0 (inclusive).
+- `content (string):` The body of the review.
+- `created_at (Timestamp)`
+- `updated_at (Timestamp)`
+
+## Get Course by ID
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/courses/:id"
+  -H "X-API-KEY: api_key"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "data": {
+    "_id": "5d2eb0c88131a99cb3d6decb",
+    "subject": "PHYS",
+    "catalog_number": "234",
+    "uw_course_id": "007407",
+    "reviews": [],
+    "academic_level": "undergraduate",
+    "useful_rating": {
+      "value": 500,
+      "count": 100
+    },
+    "easy_rating": {
+      "value": 500,
+      "count": 100
+    },
+    "liked_rating": {
+      "value": 500,
+      "count": 1000
+    },
+    "latest_term": "5d2eb0c7a8b9a99cb3d6decb",
+    "latest_detail": "5d2eb0c7a8b9a99cb3d6decb",
+    "bookmark_count": 50,
+    "created_at": "2019-07-17T05:32:54.938Z",
+    "updated_at": "2019-07-17T05:32:54.938Z"
+  }            
+}
+```
+
+Fetch a Course by ID.
+
+### HTTP Request
+
+`GET <%= config[:domain] %>/<%= config[:api_v] %>/courses/:id`
+
+### URL Parameters
+
+Parameter | Description
+--------- | -----------
+id | The unique ID of the Course to fetch.
+
+### Query Parameters
+
+Parameter | Default | Description
+--------- | ------- | -----------
+populate | [] | List of fields from the [User Model](#user-model) to populate.
+optional_fields | | Used to choose optional fields to return. Optional fields: `like_dislike`.
+
+### Response
+
+If successful, returns `200: OK` with a JSON body structured like as shown in the example.
+
+The optional fields includes:
+
+- `like_dislike (integer)`: Whether the JWT's owner liked or disliked the course. Is ignored if JWT is missing.
+
+## Search Courses
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/courses?subject=subject&catalog_number=catalog_number"
+  -H "X-API-KEY: api_key"
+```
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/courses?key=key"
+  -H "X-API-KEY: api_key"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "data": [
+    {
+      "_id": "5d2eb0c88131a99cb3d6decb",
+      "subject": "PHYS",
+      "catalog_number": "234",
+      "uw_course_id": "007407",
+      "reviews": [],
+      "academic_level": "undergraduate",
+      "useful_rating": {
+        "value": 500,
+        "count": 100
+      },
+      "easy_rating": {
+        "value": 500,
+        "count": 100
+      },
+      "liked_rating": {
+        "value": 500,
+        "count": 1000
+      },
+      "latest_term": "5d2eb0c7a8b9a99cb3d6decb",
+      "latest_detail": "5d2eb0c7a8b9a99cb3d6decb",
+      "bookmark_count": 50,
+      "created_at": "2019-07-17T05:32:54.938Z",
+      "updated_at": "2019-07-17T05:32:54.938Z"
+    }
+  ],
+  "cursor": "5d2eb0c88131a99cb3d6decb"          
+}
+```
+
+Fetch a Course by subject and catalog number.
+
+### HTTP Request
+
+`GET <%= config[:domain] %>/<%= config[:api_v] %>/courses`
+
+### Query Parameters
+
+Parameter | Default | Description
+--------- | :-----: | -----------
+key | | The keyword to search for in title, subject and catalog_number.
+subject | | The subject to fetch.
+catalog_number | ge000 | The catalog_number to fetch. Supports comparison operators: `$gt`, `$lt`, `$gte`, `$lte`.
+limit | 5 | The amount of Courses to return. Set to 0 to return everything.
+cursor | | The ID of the last item received in the previous page.
+optional_fields | | Used to choose optional fields to return. Optional fields: `like_dislike`.
+
+### Response
+
+If successful, returns `200: OK` with a JSON body structured like as shown in the example.
+
+The optional fields includes:
+
+- `like_dislike (integer)`: Whether the JWT's owner liked or disliked the course. Is ignored if JWT is missing.
+
+## Get Course Detail by ID
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/courses/details/:id"
+  -H "X-API-KEY: api_key"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "data": {
+      "_id": "5d2eb0c88131a99cb3d6decb",
+      "term_id": "5d2eb0c88131e88cb3d6decb",
+      "course_id": "5d2eb0c88131a99cb3d6decb",
+      "uw_course_id": "007407",
+      "units": 0.5,
+      "title": "Quantum Physics 1",
+      "description": "Background of quantum physics. Introduction to formalism of quantum physics. Introduction to operators. Quantization, waves and particles. The uncertainty principle. The Schroedinger equation for one-dimensional problems: bound states in square wells. Harmonic oscillator; transmission through barriers.",
+      "instructions": ["LEC", "TUT"],
+      "prerequisites": "PHYS 112 or 122; MATH 114 or 136; MATH 128 or 138 or 148.",
+      "antirequisites": "CHEM 356, NE 232, PHYS 233, ECE 405",
+      "corequisites": "One of MATH 228, AMATH 250, AMATH 251.",
+      "crosslistings": null,
+      "terms_offered": ["W", "S"],
+      "url": "http://www.ucalendar.uwaterloo.ca/1819/COURSE/course-PHYS.html#PHYS234",
+      "offerings": {
+        "online": false,
+        "online_only": false,
+        "st_jerome": false,
+        "st_jerome_only": false,
+        "renison": false,
+        "renison_only": false,
+        "conrad_grebel": false,
+        "conrad_grebel_only": false
+      },
+      "needs_department_consent": false,
+      "needs_instructor_consent": false,
+      "notes": "[Note: PHYS 236 or knowledge of computational methods is recommended. Offered: W, S]",
+      "extra": [],
+      "schedule": [
+        {
+          "class_number": "4326",
+          "section": "TUT 102",
+          "campus": "UW U",
+          "enrollment_capacity": 42,
+          "enrollment_total": 40,
+          "waiting_capacity": 0,
+          "waiting_total": 0,
+          "note": "Choose TUT section for Related 1.",
+          "associated_class": 1,
+          "related_component_1": null,
+          "related_component_2": null,
+          "classes": [
+            {
+              "date": {
+                "start_time": "13:30",
+                "end_time": "14:20",
+                "weekdays": "M",
+                "start_date": null,
+                "end_date": null,
+                "is_tba": false,
+                "is_cancelled": false,
+                "is_closed": false
+              },
+              "location": {
+                "building": "QNC",
+                "room": "2501"
+              },
+              "instructors": [
+                "Budakian,Raffi"
+              ]
+            }
+          ],
+          "reserves": [
+            {
+              "reserve_group": "Exchange students",
+              "enrollment_capacity": 10,
+              "enrollment_total": 0
+            }
+          ],
+          "updated_at": "2019-07-17T05:32:54.938Z"
+        }
+      ],
+      "created_at": "2019-07-17T05:32:54.938Z",
+      "updated_at": "2019-07-17T05:32:54.938Z"
+    }
+}
+```
+
+Fetch a Course Detail by ID.
+
+### HTTP Request
+
+`GET <%= config[:domain] %>/<%= config[:api_v] %>/courses/details/:id`
+
+### URL Parameters
+
+Parameter | Description
+--------- | -----------
+id | The unique ID of the Course Detail to fetch.
+
+### Response
+
+If successful, returns `200: OK` with a JSON body structured like as shown in the example.
+
+## Get Course Details
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/courses/details?course_id=course_id&term_id=term_id"
+  -H "X-API-KEY: api_key"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "data": [
+    {
+      "_id": "5d2eb0c88131a99cb3d6decb",
+      "term_id": "5d2eb0c88131e88cb3d6decb",
+      "course_id": "5d2eb0c88131a99cb3d6decb",
+      "uw_course_id": "007407",
+      "units": 0.5,
+      "title": "Quantum Physics 1",
+      "description": "Background of quantum physics. Introduction to formalism of quantum physics. Introduction to operators. Quantization, waves and particles. The uncertainty principle. The Schroedinger equation for one-dimensional problems: bound states in square wells. Harmonic oscillator; transmission through barriers.",
+      "instructions": ["LEC", "TUT"],
+      "prerequisites": "PHYS 112 or 122; MATH 114 or 136; MATH 128 or 138 or 148.",
+      "antirequisites": "CHEM 356, NE 232, PHYS 233, ECE 405",
+      "corequisites": "One of MATH 228, AMATH 250, AMATH 251.",
+      "crosslistings": null,
+      "terms_offered": ["W", "S"],
+      "url": "http://www.ucalendar.uwaterloo.ca/1819/COURSE/course-PHYS.html#PHYS234",
+      "offerings": {
+        "online": false,
+        "online_only": false,
+        "st_jerome": false,
+        "st_jerome_only": false,
+        "renison": false,
+        "renison_only": false,
+        "conrad_grebel": false,
+        "conrad_grebel_only": false
+      },
+      "needs_department_consent": false,
+      "needs_instructor_consent": false,
+      "notes": "[Note: PHYS 236 or knowledge of computational methods is recommended. Offered: W, S]",
+      "extra": [],
+      "schedule": [
+        {
+          "class_number": "4326",
+          "section": "TUT 102",
+          "campus": "UW U",
+          "enrollment_capacity": 42,
+          "enrollment_total": 40,
+          "waiting_capacity": 0,
+          "waiting_total": 0,
+          "note": "Choose TUT section for Related 1.",
+          "associated_class": 1,
+          "related_component_1": null,
+          "related_component_2": null,
+          "classes": [
+            {
+              "date": {
+                "start_time": "13:30",
+                "end_time": "14:20",
+                "weekdays": "M",
+                "start_date": null,
+                "end_date": null,
+                "is_tba": false,
+                "is_cancelled": false,
+                "is_closed": false
+              },
+              "location": {
+                "building": "QNC",
+                "room": "2501"
+              },
+              "instructors": [
+                "Budakian,Raffi"
+              ]
+            }
+          ],
+          "reserves": [
+            {
+              "reserve_group": "Exchange students",
+              "enrollment_capacity": 10,
+              "enrollment_total": 0
+            }
+          ],
+          "updated_at": "2019-07-17T05:32:54.938Z"
+        }
+      ],
+      "created_at": "2019-07-17T05:32:54.938Z",
+      "updated_at": "2019-07-17T05:32:54.938Z"
+    }
+  ],
+  "cursor": "5d2eb0c88131a99cb3d6decb"
+}
+```
+
+Fetch a list of Course Detail by Term and Course.
+The list is sorted from newest to oldest.
+
+### HTTP Request
+
+`GET <%= config[:domain] %>/<%= config[:api_v] %>/courses/details`
+
+### Query Parameters
+
+Parameter | Default | Description
+--------- | :-----: | -----------
+course_id* | | The ID of the course.
+term_id | | The ID of the term. Supports comparison operators: `$gt`, `$lt`, `$gte`, `$lte`.
+limit | 5 | The amount of Course Details to return. Set to to return everything.
+cursor | | The ID of the last item received in the previous page.
+
+*: Required
+
+### Response
+
+If successful, returns `200: OK` with a JSON body structured like as shown in the example where the latest terms are in front.
+
+## Like Dislike a Course by ID
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/courses/:id/likesdislikes"
+  -H "X-API-KEY: api_key"
+  -H "X-WAUTH: token"
+  -X PUT --data "json_body"
+```
+
+> Example of `json_body`:
+
+```json
+{
+  "like_dislike": 1
+}
+```
+
+Modify the likes from self (identified by `X-WAUTH`) to a given course identified by ID.
+
+### HTTP Request
+
+`PUT <%= config[:domain] %>/<%= config[:api_v] %>/courses/:id/likesdislikes`
+
+### URL Parameters
+
+Parameter | Description
+--------- | -----------
+id | The unique ID of the course to like/dislike
+
+### Request Body
+
+The request body must be a JSON and the header `Content-Type` must be `application/json`.
+
+The request body contains only one field:
+- `like_dislike (integer)`: Represents the action of liking or disliking. `-1` means dislike. `0` means undo like/dislike. `1` means like.
+
+### Response
+
+If successful, returns `204: No Content`.
+
+## Create a Course Review
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/courses/:id/reviews"
+  -H "X-API-KEY: api_key"
+  -H "X-WAUTH: token"
+  -X POST --data "json_body"
+```
+
+> Example of `json_body`:
+
+```json
+{
+  "term_id": "5d2eb0c88131a99cb3d6decb",
+  "useful_rating": 5,
+  "easy_rating": 5,
+  "content": "REVIEW CONTENT"
+}
+```
+
+Create a review for a course, identified by ID, from self, identified by `X-WAUTH`.
+Each user can only give one review to each course.
+
+### HTTP Request
+
+`POST <%= config[:domain] %>/<%= config[:api_v] %>/courses/:id/reviews`
+
+### URL Parameters
+
+Parameter | Description
+--------- | -----------
+id | The unique ID of the course to review
+
+### Request Body
+
+The request body must be a JSON and the header `Content-Type` must be `application/json`.
+
+The request body contains:
+- `term_id (Term._id)`: Represents the action of liking or disliking. `-1` means dislike. `0` means undo like/dislike. `1` means like.
+- `useful_rating (integer)`: Rating of how useful the course is from `1` to `5`.
+- `easy_rating (integer)`: Rating of how easy the course is from `1` to `5`.
+- `content (string)`: The comment on the course.
+
+### Response
+
+If successful, returns `204: No Content`.<br/>
+If the user has already reviewed the course, returns `409: Conflict`.
+
+## Modify a Course Review
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/courses/:id/reviews"
+  -H "X-API-KEY: api_key"
+  -H "X-WAUTH: token"
+  -X PUT --data "json_body"
+```
+
+> Example of `json_body`:
+
+```json
+{
+  "term_id": "5d2eb0c88131a99cb3d6decb",
+  "useful_rating": 5,
+  "easy_rating": 5,
+  "content": "REVIEW CONTENT"
+}
+```
+
+Modify a review for a course, identified by ID, from self, identified by `X-WAUTH`.
+Each user can only give one review to each course.
+
+### HTTP Request
+
+`PUT <%= config[:domain] %>/<%= config[:api_v] %>/courses/:id/reviews`
+
+### URL Parameters
+
+Parameter | Description
+--------- | -----------
+id | The unique ID of the course to review
+
+### Request Body
+
+The request body must be a JSON and the header `Content-Type` must be `application/json`.
+
+The request body contains:
+- `term_id (Term._id)`: Represents the action of liking or disliking. `-1` means dislike. `0` means undo like/dislike. `1` means like.
+- `useful_rating (integer)`: Rating of how useful the course is from `1` to `5`.
+- `easy_rating (integer)`: Rating of how easy the course is from `1` to `5`.
+- `content (string)`: The comment on the course.
+
+### Response
+
+If successful, returns `204: No Content`.

@@ -1,0 +1,34 @@
+FROM node:10-alpine
+MAINTAINER Duc Thanh Nguyen (ng.duc.tahn@gmail.com)
+
+# Expose port 5000
+EXPOSE 5000
+
+# Install python to compile argon2
+RUN apk add --update \
+    python \
+    python-dev \
+    py-pip \
+    build-base \
+  && pip install virtualenv \
+  && rm -rf /var/cache/apk/*
+
+# Install some node packages
+RUN npm i -g node-gyp
+RUN npm i -g nodemon
+
+# Install npm packages
+WORKDIR /app
+COPY ./server/package.json /app/package.json
+RUN npm i
+ENV PATH /app/node_modules/.bin:$PATH
+
+# Set environment
+ENV NODE_ENV dev
+ENV APP_ROOT_PATH /app/server
+
+# Select Working Directory
+WORKDIR /app/server
+
+# Start the API
+CMD ["nodemon", "-L", "server.js"]

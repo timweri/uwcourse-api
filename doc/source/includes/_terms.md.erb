@@ -1,0 +1,116 @@
+# Terms
+
+## Term Model
+
+> Example of a term JSON document:
+
+```json
+{
+  "id": "5d2eb0c88131a99cb3d6decb",
+  "next": "5d2eb0c88131a99cb3d6decc", 
+  "previous": "5d2eb0c88131a99cb3d6deca",
+  "uw_term_id": "1195",
+  "year": 2019,
+  "season": "Spring",
+  "created_at": "2019-07-17T05:32:54.938Z",
+  "updated_at": "2019-07-17T05:32:54.938Z"
+}
+```
+
+The list of fields below illustrates how the publicly exposed Term model is defined:
+
+
+- `id (objectId)`: The unique ID of the term.
+- `next (Term.id)`: The ID of the next term. Is `null` if no such term is available.
+- `previous (Term.id)`: The ID of the previous term. Is `null` if no such term is available.
+- `uw_term_id (string)`: The unique ID of the term assigned by UWaterloo.
+- `year (Number)`: The year of the term.
+- `season (string)`: The season of the term and is one of `Spring`, `Fall` and `Winter`.
+- `created_at (Timestamp)`
+- `updated_at (Timestamp)`
+
+## Get a Term by ID
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/terms/:id"
+  -H "X-API-KEY: api_key"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "data": {
+    "id": "5d2eb0c88131a99cb3d6decb",
+    "next": "5d2eb0c88131a99cb3d6decc", 
+    "previous": "5d2eb0c88131a99cb3d6deca",
+    "uw_term_id": "1195",
+    "year": 2019,
+    "season": "Spring",
+    "created_at": "2019-07-17T05:32:54.938Z",
+    "updated_at": "2019-07-17T05:32:54.938Z"
+  }
+}
+```
+
+Fetch a Term by ID.
+
+### HTTP Request
+
+`GET <%= config[:domain] %>/<%= config[:api_v] %>/terms/:id`
+
+### URL Parameters
+
+Parameter | Description
+--------- | -----------
+id | The ID of the Term.
+
+### Response
+
+If successful, returns `200: OK` with a JSON body structured like as shown in the example.
+
+## Get Terms
+
+```shell
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/terms?year=year&season=season"
+  -H "X-API-KEY: api_key"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "data": [{
+    "id": "5d2eb0c88131a99cb3d6decb",
+    "next": "5d2eb0c88131a99cb3d6decc", 
+    "previous": "5d2eb0c88131a99cb3d6deca",
+    "uw_term_id": "1195",
+    "year": 2019,
+    "season": "Spring",
+    "created_at": "2019-07-17T05:32:54.938Z",
+    "updated_at": "2019-07-17T05:32:54.938Z"
+  }],
+  "cursor": "5d2eb0c88131a99cb3d6decb" 
+}
+```
+
+Fetch terms by multiple conditions.
+
+### HTTP Request
+
+`GET <%= config[:domain] %>/<%= config[:api_v] %>/terms`
+
+### Query Parameters
+
+Parameter | Default | Description
+--------- | ------- | -----------
+uw_term_id | The Registrar assigned term id.
+term_id | The ID of the term. Supports comparison operators: `$gt`, `$lt`, `$gte`, `$lte`.
+year | The year the Term belongs to. Supports comparison operators: `$gt`, `$lt`, `$gte`, `$lte`.
+season | The season of the Term. Possible values are `Fall`, `Winter` and `Spring`.
+limit | 5 | The amount of Terms to return. Set to 0 to return everything.
+cursor | | The ID of the last item received in the previous page.
+
+### Response
+
+If successful, returns `200: OK` with a JSON body structured like as shown in the example.

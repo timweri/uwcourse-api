@@ -1,0 +1,8 @@
+.*
+*.md
+Dockerfile-*
+docker-compose.yml
+node_modules
+server/node_modules
+taskrunner/node_modules
+taskrunner.env

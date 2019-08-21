@@ -1,0 +1,67 @@
+{
+    "env": {
+        "commonjs": true,
+        "es6": true,
+        "node": true
+    },
+    "extends": "eslint:recommended",
+    "globals": {
+        "Atomics": "readonly",
+        "SharedArrayBuffer": "readonly"
+    },
+    "parserOptions": {
+        "ecmaVersion": 2018
+    },
+    "rules": {
+        "no-unused-vars": "warn",
+        "no-console": "off",
+        "comma-dangle": ["error", {
+            "arrays": "always-multiline",
+            "objects": "always-multiline",
+            "imports": "always-multiline",
+            "exports": "always-multiline",
+            "functions": "always-multiline"
+        }],
+        "comma-spacing": ["error", {"before": false, "after": true}],
+        "comma-style": ["error", "last"],
+        "semi": ["error", "always"],
+        "semi-style": ["error", "last"],
+        "semi-spacing": ["error", {"before": false, "after": true}],
+        "computed-property-spacing": ["error", "never"],
+        "quotes": ["error", "single", {"avoidEscape": true}],
+        "one-var-declaration-per-line": ["error", "always"],
+        "operator-assignment": ["error", "always"],
+        "array-bracket-newline": ["error", "consistent"],
+        "array-element-newline": ["error", "consistent"],
+        "array-bracket-spacing": ["error", "never"],
+        "brace-style": "error",
+        "indent": ["error", 4, {"SwitchCase": 1}],
+        "func-call-spacing": ["error", "never"],
+        "key-spacing": ["error", {"beforeColon": false, "afterColon": true}],
+        "eol-last": ["error", "always"],
+        "no-trailing-spaces": "error",
+        "no-whitespace-before-property": "error",
+        "padded-blocks": ["error", "never"],
+        "implicit-arrow-linebreak": ["error", "beside"],
+        "function-paren-newline": ["error", "consistent"],
+        "new-parens": "error",
+        "keyword-spacing": ["error", {"before": true, "after": true}],
+        "linebreak-style": ["error", "unix"],
+        "lines-between-class-members": ["error", "always"],
+        "newline-per-chained-call": ["error", {"ignoreChainWithDepth": 4}],
+        "no-multiple-empty-lines": ["error", {"max": 2, "maxBOF": 0, "maxEOF": 0}],
+        "switch-colon-spacing": ["error", {"after": true, "before": false}],
+        "space-unary-ops": "error",
+        "space-infix-ops": "error",
+        "space-in-parens": ["error", "never"],
+        "space-before-function-paren": ["error", {
+            "anonymous": "always",
+            "named": "never",
+            "asyncArrow": "always"
+        }],
+        "prefer-const": "error",
+        "no-useless-computed-key": "error",
+        "dot-notation": "error",
+        "dot-location": ["error", "property"]
+    }
+}

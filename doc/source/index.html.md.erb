@@ -1,0 +1,76 @@
+---
+title: UW Course API Reference
+
+language_tabs: # must be one of https://git.io/vQNgJ
+  - shell
+
+toc_footers:
+  - <a href='#'>Sign Up for a Developer Key</a>
+  - <a href='https://github.com/lord/slate'>Documentation Powered by Slate</a>
+
+includes:
+  - users
+  - courses
+  - terms
+  - errors
+
+search: true
+---
+
+# Introduction
+
+Welcome to the UWCourse API! You can use our API to access UWCourse API endpoints, which are used to interact with the course manager backend.
+
+This example API documentation page was created with [Slate](https://github.com/lord/slate). Feel free to edit it and use it as a base for your own API's documentation.
+
+# Authentication
+
+## API Key
+
+> To authorize, set the HTTP request header X-API-KEY to your API key:
+
+```shell
+curl <api_end_point>
+  -H "X-API-KEY: api_key"
+```
+
+> Make sure to replace `api_key` with the actual API key.
+
+UWCourse API uses API keys to allow access to all endpoints of the API. For now, we don't plan to distribute any API key.
+
+UWCourse API expects for the API key to be included in all API requests to the server the header `X-API-KEY`.
+
+The API will return `403: Unauthorized` if the API Key is missing/invalid.
+
+## User Token
+
+> To authorize, set the HTTP request header X-WAUTH to the JWT associated with the user:
+
+```shell
+curl <api_end_point>
+  -H "X-WAUTH: token_string"
+```
+
+> Make sure to replace `token_string` with the actual JWT token.
+
+UWCourse API uses JWT token to fetch and modify certain private user's information.
+The token can be generated through the [Sign in]() endpoint.
+Once a token is generated, it is valid for 3 hours.
+A token can be invalidated prematurely if there are suspicious activity or the user changed their password.
+
+This documentation will specify clearly if an endpoint operation requires a JWT user token.
+
+The UWCourse API expects the token when required to be stored as the header `X-WAUTH`.
+
+The API will return a `403: Unauthorized` if the token is missing or invalid.
+
+# Timestamp
+
+> Example of a timestamp string representing 15:51:26 on July 21st, 2019 in EDT timezone:
+
+```
+2019-07-21T19:51:26Z
+```
+
+Many models do carry the information about when the documents were created and updated.
+All these timestamp uses the MongoDB's [ISODate](https://docs.mongodb.com/manual/reference/method/Date/) format (in UTC timezone).

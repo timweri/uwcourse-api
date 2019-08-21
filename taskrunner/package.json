@@ -1,0 +1,21 @@
+{
+  "name": "uwcourse-taskrunner",
+  "version": "1.0.0",
+  "description": "",
+  "main": "start.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Duc Thanh Nguyen",
+  "license": "ISC",
+  "dependencies": {
+    "app-root-path": "^2.1.0",
+    "mongoose": "^5.4.16",
+    "mongoose-immutable-plugin": "^1.0.1",
+    "node-cron": "^2.0.3",
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.7",
+    "requiredir": "^1.0.7",
+    "winston": "^3.2.1"
+  }
+}
