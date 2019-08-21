@@ -57,6 +57,6 @@ services:
     ports:
       - "4567:4567"
     volumes:
-      - ./doc:/uwcourse-doc
+      - ./doc:/app/doc
 volumes:
   mongodata:

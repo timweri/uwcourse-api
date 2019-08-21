@@ -1,15 +1,15 @@
-FROM ruby:2.3-alpine
+FROM ruby:2.5-alpine
 MAINTAINER Duc Thanh Nguyen (ng.duc.tahn@gmail.com)
 
-WORKDIR /uwcourse-doc
+WORKDIR /app
 
-COPY ./doc/Gemfile /uwcourse-doc/Gemfile
-COPY ./doc/Gemfile.lock /uwcourse-doc/Gemfile.lock
+COPY ./doc/Gemfile /app/Gemfile
 
 RUN apk add --update nodejs g++ make
+RUN gem install nokogiri
 RUN bundle install
 
-COPY ./doc /uwcourse-doc
+WORKDIR /app/doc
 
 EXPOSE 4567
 
