@@ -8,6 +8,7 @@ EXPOSE 8080
 RUN npm i -g @vue/cli
 WORKDIR /app
 COPY ./frontend/package.json /app/package.json
+COPY ./frontend/postcss.config.js /app/postcss.config.js
 RUN npm i
 ENV PATH /app/node_modules/.bin:$PATH
 
@@ -19,4 +20,4 @@ ENV APP_ROOT_PATH /app/frontend
 WORKDIR /app/frontend
 
 # Start the API
-CMD ["npm", "run", "serve"]
+CMD ["npm", "run", "dev"]

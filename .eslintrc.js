@@ -1,29 +1,29 @@
-{
-    "env": {
+module.exports = {
+    env: {
         "commonjs": true,
         "es6": true,
-        "node": true
+        "node": true,
     },
-    "extends": [
+    extends: [
         "plugin:vue/essential",
-        "eslint:recommended"
+        "eslint:recommended",
     ],
-    "globals": {
+    globals: {
         "Atomics": "readonly",
-        "SharedArrayBuffer": "readonly"
+        "SharedArrayBuffer": "readonly",
     },
-    "parserOptions": {
-        "ecmaVersion": 2018
+    parserOptions: {
+        "ecmaVersion": 2018,
     },
-    "rules": {
+    rules: {
         "no-unused-vars": "warn",
-        "no-console": "off",
+        "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
         "comma-dangle": ["error", {
             "arrays": "always-multiline",
             "objects": "always-multiline",
             "imports": "always-multiline",
             "exports": "always-multiline",
-            "functions": "always-multiline"
+            "functions": "always-multiline",
         }],
         "comma-spacing": ["error", {"before": false, "after": true}],
         "comma-style": ["error", "last"],
@@ -65,6 +65,6 @@
         "prefer-const": "error",
         "no-useless-computed-key": "error",
         "dot-notation": "error",
-        "dot-location": ["error", "property"]
-    }
-}
+        "dot-location": ["error", "property"],
+    },
+};
