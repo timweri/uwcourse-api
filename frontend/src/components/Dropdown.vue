@@ -23,35 +23,35 @@
 </template>
 <script>
 export default {
-  name: "drop-down",
-  props: {
-    direction: {
-      type: String,
-      default: "down"
+    name: 'drop-down',
+    props: {
+        direction: {
+            type: String,
+            default: 'down',
+        },
+        multiLevel: {
+            type: Boolean,
+            default: false,
+        },
+        title: String,
+        icon: String,
     },
-    multiLevel: {
-      type: Boolean,
-      default: false
+    data() {
+        return {
+            isOpen: false,
+        };
     },
-    title: String,
-    icon: String
-  },
-  data() {
-    return {
-      isOpen: false
-    };
-  },
-  methods: {
-    toggleDropDown() {
-      if (this.multiLevel) {
-        this.isOpen = true;
-      } else {
-        this.isOpen = !this.isOpen;
-      }
+    methods: {
+        toggleDropDown() {
+            if (this.multiLevel) {
+                this.isOpen = true;
+            } else {
+                this.isOpen = !this.isOpen;
+            }
+        },
+        closeDropDown() {
+            this.isOpen = false;
+        },
     },
-    closeDropDown() {
-      this.isOpen = false;
-    }
-  }
 };
 </script>

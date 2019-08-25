@@ -4,6 +4,9 @@ module.exports = {
             css: {
                 sourceMap: process.env.NODE_ENV !== 'production',
             },
+            sass: {
+                data: '@import "@/assets/scss/global.scss";',
+            },
         },
     },
 };

@@ -45,36 +45,36 @@
 
 <script>
 export default {
-  props: {
-    flexColumn: Boolean,
-    navPillsIcons: Boolean,
-    plain: Boolean,
-    tabName: Array,
-    tabIcon: Array,
-    colorButton: {
-      type: String,
-      default: ""
-    }
-  },
-  data() {
-    return {
-      activePanel: this.tabName[0]
-    };
-  },
-  methods: {
-    switchPanel(panel) {
-      this.activePanel = panel;
+    props: {
+        flexColumn: Boolean,
+        navPillsIcons: Boolean,
+        plain: Boolean,
+        tabName: Array,
+        tabIcon: Array,
+        colorButton: {
+            type: String,
+            default: '',
+        },
     },
-    isActivePanel(panel) {
-      return this.activePanel == panel;
+    data() {
+        return {
+            activePanel: this.tabName[0],
+        };
     },
-    getColorButton: function(colorButton) {
-      return "md-" + colorButton + "";
+    methods: {
+        switchPanel(panel) {
+            this.activePanel = panel;
+        },
+        isActivePanel(panel) {
+            return this.activePanel == panel;
+        },
+        getColorButton: function (colorButton) {
+            return 'md-' + colorButton + '';
+        },
+        getTabContent: function (index) {
+            return 'tab-pane-' + index + '';
+        },
     },
-    getTabContent: function(index) {
-      return "tab-pane-" + index + "";
-    }
-  }
 };
 </script>
 

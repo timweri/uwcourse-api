@@ -16,7 +16,11 @@
     &,
     &:hover,
     &:focus{
-      color: $white-color !important;
+      color: $uw-black !important;
+    }
+
+    .md-title, &, &:hover, &:focus {
+      font-weight: 900;
     }
   }
 
