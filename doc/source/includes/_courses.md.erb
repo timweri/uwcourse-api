@@ -329,7 +329,7 @@ curl "<%= config[:domain] %>/<%= config[:api_v] %>/courses?subject=subject&catal
 ```
 
 ```shell
-curl "<%= config[:domain] %>/<%= config[:api_v] %>/courses?key=key"
+curl "<%= config[:domain] %>/<%= config[:api_v] %>/courses?keywords=keywords"
   -H "X-API-KEY: api_key"
 ```
 
@@ -378,7 +378,7 @@ Fetch a Course by subject and catalog number.
 
 Parameter | Default | Description
 --------- | :-----: | -----------
-key | | The keyword to search for in title, subject and catalog_number.
+keywords | | The keyword to search for in title, subject and catalog_number.
 subject | | The subject to fetch.
 catalog_number | ge000 | The catalog_number to fetch. Supports comparison operators: `$gt`, `$lt`, `$gte`, `$lte`.
 limit | 5 | The amount of Courses to return. Set to 0 to return everything.

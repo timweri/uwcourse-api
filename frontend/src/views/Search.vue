@@ -3,9 +3,6 @@
     <div class="page-header header-filter">
       <div class="md-layout">
         <div class="md-layout-item">
-          <div class="brand custom-brand">
-            <h1>UWCourse</h1>
-          </div>
           <big-search-bar></big-search-bar>
         </div>
       </div>

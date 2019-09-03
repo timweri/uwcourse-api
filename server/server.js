@@ -13,8 +13,10 @@ const unsupportedEndpoint = require('./controllers/unsupported_endpoint');
 const config = require('./config/config');
 
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 app.set('trust proxy', true);
+app.use(cors())
 app.use(addRequestId);
 
 app.use(bodyParser.urlencoded({
