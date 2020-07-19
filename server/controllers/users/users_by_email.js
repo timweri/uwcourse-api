@@ -1,13 +1,13 @@
 const User = require('../../models/User');
 
-// Search a user by name
-exports.users_by_name = (req, res) => {
+// Search a user by username
+exports.users_by_email = (req, res) => {
   let result = {};
   let status = 200;
 
-  const { name } = req.body;
+  const { email } = req.body;
 
-  User.find({name}, async (err, user) => {
+  User.find({email}, async (err, user) => {
     if (!err && user) {
         try{
             status = 200;
